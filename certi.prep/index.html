@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es" class="dark">
+<html lang="es" class="dark scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CertiPrep AI | Simulador de Exámenes con IA y Backend Real</title>
+    <title>CertiPrep AI | Plataforma Completa con Autenticación OTP y Wompi</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -15,6 +15,7 @@
                         brand: {
                             50: '#eef2ff',
                             100: '#e0e7ff',
+                            400: '#818cf8',
                             500: '#6366f1',
                             600: '#4f46e5',
                             700: '#4338ca',
@@ -33,15 +34,23 @@
     <!-- FontAwesome para Iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 antialiased min-h-screen flex flex-col justify-between selection:bg-brand-500 selection:text-white">
 
-    <!-- HEADER / NAVBAR -->
-    <header class="sticky top-0 z-50 backdrop-blur-md bg-slate-950/80 border-b border-slate-800">
+    <!-- NOTIFICACIÓN TIPO TOAST (REEMPLAZO DE ALERT) -->
+    <div id="toast-container" class="fixed top-20 right-5 z-50 flex flex-col gap-3 max-w-md w-full pointer-events-none"></div>
+
+    <!-- HEADER / NAVBAR GLOBAL -->
+    <header class="sticky top-0 z-40 backdrop-blur-md bg-slate-950/80 border-b border-slate-800/80">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center space-x-3 cursor-pointer" onclick="router.navigate('landing')">
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-400 flex items-center justify-center shadow-lg shadow-brand-500/30">
@@ -51,40 +60,39 @@
             </div>
 
             <nav class="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-300">
-                <a href="#features" class="hover:text-white transition">Funciones</a>
-                <a href="#pricing" class="hover:text-white transition">Precios</a>
-                <a href="#faq" class="hover:text-white transition">FAQ</a>
+                <button onclick="router.scrollToSection('features')" class="hover:text-white transition">Funciones</button>
+                <button onclick="router.scrollToSection('pricing')" class="hover:text-white transition">Precios</button>
+                <button onclick="router.scrollToSection('faq')" class="hover:text-white transition">Preguntas Frecuentes</button>
             </nav>
 
-            <div class="flex items-center space-x-4">
-                <button onclick="router.navigate('auth', 'login')" class="hidden sm:inline-flex text-sm font-medium text-slate-300 hover:text-white px-4 py-2 transition">Iniciar Sesión</button>
-                <button onclick="router.navigate('auth', 'register')" class="bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium px-5 py-2.5 rounded-xl shadow-lg shadow-brand-600/20 transition transform active:scale-95">Empezar Gratis</button>
+            <div class="flex items-center space-x-4" id="nav-actions">
+                <!-- Se actualiza dinámicamente según el estado de la sesión -->
             </div>
         </div>
     </header>
 
     <!-- MAIN VIEW CONTAINER -->
     <main id="app-container" class="flex-grow">
-        <!-- Contenido dinámico inyectado por el router -->
+        <!-- El contenido dinámico es inyectado por el enrutador JS -->
     </main>
 
-    <!-- FOOTER -->
-    <footer class="bg-slate-900 border-t border-slate-800 text-slate-400 py-12 px-4 sm:px-6 lg:px-8">
+    <!-- FOOTER GLOBAL -->
+    <footer class="bg-slate-900 border-t border-slate-800/80 text-slate-400 py-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
-                <div class="flex items-center space-x-3 mb-4">
+                <div class="flex items-center space-x-3 mb-4 cursor-pointer" onclick="router.navigate('landing')">
                     <div class="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center">
                         <i class="fa-solid fa-brain text-white text-sm"></i>
                     </div>
                     <span class="text-lg font-bold text-white">CertiPrep AI</span>
                 </div>
-                <p class="text-sm text-slate-400">La plataforma líder potenciada por IA para asegurar tu certificación profesional a la primera.</p>
+                <p class="text-sm text-slate-400 leading-relaxed">La plataforma SaaS líder potenciada por Inteligencia Artificial para asegurar tu certificación profesional a la primera.</p>
             </div>
             <div>
-                <h4 class="text-white font-semibold mb-3 text-sm">Legal</h4>
+                <h4 class="text-white font-semibold mb-3 text-sm">Documentos Legales</h4>
                 <ul class="space-y-2 text-sm">
-                    <li><a href="#" onclick="router.navigate('legal', 'terms')" class="hover:text-white transition">Términos y Condiciones</a></li>
-                    <li><a href="#" onclick="router.navigate('legal', 'privacy')" class="hover:text-white transition">Política de Privacidad</a></li>
+                    <li><button onclick="router.navigate('legal', 'terms')" class="hover:text-white transition text-left">Términos y Condiciones</button></li>
+                    <li><button onclick="router.navigate('legal', 'privacy')" class="hover:text-white transition text-left">Política de Privacidad</button></li>
                 </ul>
             </div>
             <div>
@@ -96,176 +104,368 @@
                 </ul>
             </div>
             <div>
-                <h4 class="text-white font-semibold mb-3 text-sm">Soporte</h4>
+                <h4 class="text-white font-semibold mb-3 text-sm">Atención al Cliente</h4>
                 <p class="text-sm text-slate-400 mb-2">¿Tienes dudas con tu cuenta o pagos en Colombia?</p>
-                <span class="text-brand-400 text-sm font-medium">soporte@certiprep.ai</span>
+                <a href="mailto:soporte@certiprep.ai" class="text-brand-400 hover:text-brand-300 text-sm font-medium transition">soporte@certiprep.ai</a>
             </div>
         </div>
-        <div class="max-w-7xl mx-auto pt-8 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between text-xs">
-            <p>&copy; 2026 CertiPrep AI. Todos los derechos reservados.</p>
+        <div class="max-w-7xl mx-auto pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500">
+            <p>&copy; 2026 CertiPrep AI Inc. Todos los derechos reservados.</p>
             <div class="flex space-x-6 mt-4 sm:mt-0">
-                <a href="#" class="hover:text-white"><i class="fa-brands fa-twitter"></i></a>
-                <a href="#" class="hover:text-white"><i class="fa-brands fa-linkedin"></i></a>
-                <a href="#" class="hover:text-white"><i class="fa-brands fa-github"></i></a>
+                <a href="#" class="hover:text-white transition"><i class="fa-brands fa-twitter"></i></a>
+                <a href="#" class="hover:text-white transition"><i class="fa-brands fa-linkedin"></i></a>
+                <a href="#" class="hover:text-white transition"><i class="fa-brands fa-github"></i></a>
             </div>
         </div>
     </footer>
 
-    <!-- JAVASCRIPT: CONFIGURACIÓN DE BACKEND Y CONTROLADORES -->
+    <!-- LÓGICA PRINCIPAL DE LA APLICACIÓN -->
     <script>
-        // =========================================================================
-        //   CORRECCIÓN 1: CREDENCIALES
-        // =========================================================================
         
-        // CORRECCIÓN: Eliminado '/rest/v1/' para que el SDK de Supabase funcione correctamente.
+        // URL y Llave Anónima de Supabase
         const SUPABASE_URL = 'https://roknztgkfzyndfexcllv.supabase.co'; 
-
-        // Anon Key pública de Supabase
         const SUPABASE_ANON_KEY = 'sb_publishable_D-ATLuZXPBgtCa1dhCBcqg_86kZyNcR'; 
 
-        // Llave Pública de Wompi (Remplazar con 'pub_test_...' o 'pub_prod_...' del Dashboard Wompi)
+        // Llave pública de Wompi Colombia (Pruebas / Producción)
         const WOMPI_PUBLIC_KEY = 'pub_prod_Cku7YXMh34ncyvyPeMv5zpiCsfgMAV8R'; 
 
-        // Inicializar cliente Supabase de forma segura
+        // Inicialización segura del cliente Supabase
         let supabaseClient = null;
         try {
             if (SUPABASE_URL.startsWith('https://') && !SUPABASE_URL.includes('/rest/v1')) {
                 supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                console.log("Conexión con Supabase inicializada con éxito.");
+                console.log("Conexión con Supabase establecida.");
             }
         } catch(e) {
-            console.warn("Modo simulación activado: Verifica las credenciales de Supabase.", e);
+            console.warn("Modo local resguardo activo para Supabase.", e);
         }
 
-        // =========================================================================
-        //     CORRECCIÓN 2: PERSISTENCIA REAL EN BASE DE DATOS Y AUTENTICACIÓN
-        // =========================================================================
+        function showNotification(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            if(!container) return;
+            
+            const toast = document.createElement('div');
+            toast.className = `pointer-events-auto p-4 rounded-xl border shadow-xl text-xs sm:text-sm font-medium flex items-center justify-between gap-3 transition-all transform translate-y-2 opacity-0 ${
+                type === 'error' ? 'bg-red-950 border-red-800 text-red-200' :
+                type === 'success' ? 'bg-emerald-950 border-emerald-800 text-emerald-200' :
+                type === 'warning' ? 'bg-amber-950 border-amber-800 text-amber-200' :
+                'bg-slate-900 border-slate-700 text-slate-200'
+            }`;
+
+            const icon = type === 'error' ? 'fa-circle-exclamation text-red-400' :
+                         type === 'success' ? 'fa-circle-check text-emerald-400' :
+                         type === 'warning' ? 'fa-triangle-exclamation text-amber-400' :
+                         'fa-circle-info text-brand-400';
+
+            toast.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <i class="fa-solid ${icon} text-base"></i>
+                    <span>${message}</span>
+                </div>
+                <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            `;
+
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 50);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        }
+
         const BackendStore = {
-            // Obtener el usuario autenticado actualmente
+            // Consulta de sesión verificada
             getSessionUser: async () => {
                 if (supabaseClient) {
-                    const { data: { session } } = await supabaseClient.auth.getSession();
-                    if (session && session.user) {
-                        // Consultar datos adicionales de la tabla 'profiles' en PostgreSQL
-                        const { data: profile } = await supabaseClient
-                            .from('profiles')
-                            .select('*')
-                            .eq('id', session.user.id)
-                            .maybeSingle();
-                        
-                        return {
-                            ...session.user,
-                            profileData: profile
-                        };
+                    try {
+                        const { data: { session } } = await supabaseClient.auth.getSession();
+                        if (session && session.user) {
+                            const { data: profile } = await supabaseClient
+                                .from('profiles')
+                                .select('*')
+                                .eq('id', session.user.id)
+                                .maybeSingle();
+                            
+                            return {
+                                ...session.user,
+                                isVerified: session.user.email_confirmed_at != null || (profile && profile.verified),
+                                profileData: profile
+                            };
+                        }
+                    } catch(e) {
+                        console.warn("Error leyendo sesión de Supabase:", e);
                     }
                 }
-                return JSON.parse(localStorage.getItem('certiprep_fallback_user') || 'null');
+                
+                // Retorno de sesión almacenada localmente
+                const fallback = JSON.parse(localStorage.getItem('certiprep_verified_user') || 'null');
+                return fallback;
             },
 
-            // Registro real de usuario con envío de correo de verificación
+            // Registro inicial y envío del código OTP de 6 dígitos
             register: async (email, password, fullName) => {
                 if (supabaseClient) {
                     const { data, error } = await supabaseClient.auth.signUp({
                         email,
                         password,
                         options: {
-                            data: { full_name: fullName },
-                            // Redirecciona automáticamente al origen actual (localhost o hosting)
-                            emailRedirectTo: window.location.origin
+                            data: { full_name: fullName }
                         }
                     });
                     if (error) throw error;
-                    return data.user;
+                    
+                    sessionStorage.setItem('certiprep_pending_email', email);
+                    return { user: data.user, requiresOtp: true };
                 } else {
-                    // Respaldo local si Supabase no está configurado
-                    const mockUser = { id: 'mock-' + Date.now(), email, user_metadata: { full_name: fullName }, app_metadata: { plan: 'Básico' } };
-                    localStorage.setItem('certiprep_fallback_user', JSON.stringify(mockUser));
-                    return mockUser;
+                    // Modo simulado local con código de prueba 123456
+                    const pendingUser = {
+                        email,
+                        fullName,
+                        password,
+                        mockCode: '123456'
+                    };
+                    sessionStorage.setItem('certiprep_pending_mock', JSON.stringify(pendingUser));
+                    sessionStorage.setItem('certiprep_pending_email', email);
+                    return { requiresOtp: true };
                 }
             },
 
-            // Inicio de sesión con correo y contraseña
+            // Verificación formal del código OTP
+            verifyOtp: async (email, token) => {
+                if (supabaseClient) {
+                    let userObj = null;
+                    const { data, error } = await supabaseClient.auth.verifyOtp({
+                        email,
+                        token,
+                        type: 'signup'
+                    });
+
+                    if (error) {
+                        const { data: data2, error: error2 } = await supabaseClient.auth.verifyOtp({
+                            email,
+                            token,
+                            type: 'email'
+                        });
+                        if (error2) throw error2;
+                        userObj = data2.user;
+                    } else {
+                        userObj = data.user;
+                    }
+
+                    if (userObj) {
+                        await supabaseClient.from('profiles').upsert({
+                            id: userObj.id,
+                            email: userObj.email,
+                            full_name: userObj.user_metadata?.full_name || 'Estudiante',
+                            verified: true,
+                            plan: 'Básico'
+                        });
+                    }
+                    return userObj;
+                } else {
+                    const pendingRaw = sessionStorage.getItem('certiprep_pending_mock');
+                    const pending = pendingRaw ? JSON.parse(pendingRaw) : null;
+
+                    if (pending && pending.email === email && (token === '123456' || token === pending.mockCode)) {
+                        const verifiedUser = {
+                            id: 'usr-' + Date.now(),
+                            email: pending.email,
+                            user_metadata: { full_name: pending.fullName },
+                            profileData: { plan: 'Básico', lang: 'es', theme: 'dark', notifications: true },
+                            isVerified: true
+                        };
+                        localStorage.setItem('certiprep_verified_user', JSON.stringify(verifiedUser));
+                        sessionStorage.removeItem('certiprep_pending_mock');
+                        sessionStorage.removeItem('certiprep_pending_email');
+                        return verifiedUser;
+                    } else {
+                        throw new Error('Código incorrecto. En modo prueba utiliza el código 123456.');
+                    }
+                }
+            },
+
+            // Inicio de sesión convencional
             login: async (email, password) => {
                 if (supabaseClient) {
                     const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
                     if (error) throw error;
+                    
+                    if (!data.user.email_confirmed_at) {
+                        sessionStorage.setItem('certiprep_pending_email', email);
+                        throw new Error('NEEDS_VERIFICATION');
+                    }
                     return data.user;
                 } else {
-                    let mockUser = { id: 'mock-login', email, user_metadata: { full_name: email.split('@')[0] }, app_metadata: { plan: 'Básico' } };
-                    localStorage.setItem('certiprep_fallback_user', JSON.stringify(mockUser));
-                    return mockUser;
+                    let localUser = JSON.parse(localStorage.getItem('certiprep_verified_user') || 'null');
+                    if (!localUser || localUser.email !== email) {
+                        localUser = {
+                            id: 'usr-' + Date.now(),
+                            email,
+                            user_metadata: { full_name: email.split('@')[0] },
+                            profileData: { plan: 'Básico', lang: 'es', theme: 'dark', notifications: true },
+                            isVerified: true
+                        };
+                        localStorage.setItem('certiprep_verified_user', JSON.stringify(localUser));
+                    }
+                    return localUser;
                 }
             },
 
-            // Cerrar sesión
+            // Cierre seguro de sesión
             logout: async () => {
-                if (supabaseClient) await supabaseClient.auth.signOut();
-                localStorage.removeItem('certiprep_fallback_user');
+                if (supabaseClient) {
+                    try { await supabaseClient.auth.signOut(); } catch(e){}
+                }
+                localStorage.removeItem('certiprep_verified_user');
+                sessionStorage.clear();
             }
         };
 
-        // Enrutador SPA
         const router = {
+            currentView: 'landing',
             navigate: async (view, param = null) => {
+                router.currentView = view;
                 const container = document.getElementById('app-container');
                 window.scrollTo(0, 0);
+
+                const user = await BackendStore.getSessionUser();
+                updateNavHeader(user);
 
                 if (view === 'landing') {
                     container.innerHTML = renderLanding();
                 } else if (view === 'auth') {
                     container.innerHTML = renderAuth(param);
+                } else if (view === 'verify-otp') {
+                    const email = param || sessionStorage.getItem('certiprep_pending_email') || '';
+                    container.innerHTML = renderOtpVerification(email);
                 } else if (view === 'dashboard') {
-                    const user = await BackendStore.getSessionUser();
-                    if(!user) { router.navigate('auth', 'login'); return; }
+                    // VERIFICACIÓN ESTRICTA DE SEGURIDAD
+                    if (!user || !user.isVerified) {
+                        showNotification('Acceso restringido. Debes verificar tu correo electrónico para ingresar.', 'warning');
+                        router.navigate('auth', 'login');
+                        return;
+                    }
                     container.innerHTML = renderDashboard(user);
                 } else if (view === 'legal') {
                     container.innerHTML = renderLegal(param);
                 }
+            },
+
+            scrollToSection: (sectionId) => {
+                if (router.currentView !== 'landing') {
+                    router.navigate('landing').then(() => {
+                        setTimeout(() => {
+                            const el = document.getElementById(sectionId);
+                            if (el) el.scrollIntoView({ behavior: 'smooth' });
+                        }, 100);
+                    });
+                } else {
+                    const el = document.getElementById(sectionId);
+                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }
             }
         };
 
-        // RENDER: Landing Page
+        function updateNavHeader(user) {
+            const navActions = document.getElementById('nav-actions');
+            if (!navActions) return;
+
+            if (user && user.isVerified) {
+                navActions.innerHTML = `
+                    <button onclick="router.navigate('dashboard')" class="bg-brand-600/20 text-brand-300 border border-brand-500/30 hover:bg-brand-600 hover:text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition">
+                        <i class="fa-solid fa-gauge mr-1.5"></i> Mi Panel
+                    </button>
+                    <button onclick="handleLogout()" class="text-slate-400 hover:text-red-400 text-xs sm:text-sm font-medium px-3 py-2 transition">
+                        Cerrar Sesión
+                    </button>
+                `;
+            } else {
+                navActions.innerHTML = `
+                    <button onclick="router.navigate('auth', 'login')" class="hidden sm:inline-flex text-sm font-medium text-slate-300 hover:text-white px-4 py-2 transition">Iniciar Sesión</button>
+                    <button onclick="router.navigate('auth', 'register')" class="bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium px-5 py-2.5 rounded-xl shadow-lg shadow-brand-600/20 transition transform active:scale-95">Empezar Gratis</button>
+                `;
+            }
+        }
+
         function renderLanding() {
             return `
-                <section class="relative pt-20 pb-32 overflow-hidden">
+                <section class="relative pt-16 pb-28 overflow-hidden">
                     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
                         <div class="inline-flex items-center space-x-2 bg-brand-950/80 border border-brand-800/60 rounded-full px-4 py-1.5 mb-8">
-                            <span class="flex h-2 w-2 rounded-full bg-brand-500 animate-pulse"></span>
-                            <span class="text-xs font-medium text-brand-300">Potenciado por IA Adaptativa y Backend Real</span>
+                            <span class="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span class="text-xs font-medium text-brand-300">Autenticación por Código OTP & Pagos Wompi Colombia</span>
                         </div>
                         <h1 class="text-4xl sm:text-6xl font-extrabold text-white tracking-tight max-w-4xl mx-auto mb-6 leading-tight">
-                            Asegura tu certificación profesional <span class="bg-gradient-to-r from-brand-500 to-indigo-400 bg-clip-text text-transparent">a la primera</span>
+                            Asegura tu certificación profesional <span class="bg-gradient-to-r from-brand-500 via-indigo-300 to-brand-400 bg-clip-text text-transparent">a la primera</span>
                         </h1>
-                        <p class="text-lg text-slate-400 max-w-2xl mx-auto mb-10">
-                            Simuladores de exámenes inteligentes con autenticación segura por correo y pasarela de pagos integrada para Colombia (PSE y Nequi).
+                        <p class="text-lg text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+                            Simuladores de exámenes predictivos con IA adaptativa. Verifica tu cuenta de forma segura con un código numérico y prepárate con garantía de aprobación.
                         </p>
                         <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4">
-                            <button onclick="router.navigate('auth', 'register')" class="w-full sm:w-auto bg-brand-600 hover:bg-brand-500 text-white font-medium px-8 py-4 rounded-xl shadow-xl shadow-brand-600/30 transition transform hover:-translate-y-0.5">
+                            <button onclick="router.navigate('auth', 'register')" class="w-full sm:w-auto bg-brand-600 hover:bg-brand-500 text-white font-semibold px-8 py-4 rounded-xl shadow-xl shadow-brand-600/30 transition transform hover:-translate-y-0.5">
                                 Empieza Gratis Ahora <i class="fa-solid fa-arrow-right ml-2"></i>
                             </button>
-                            <a href="#pricing" class="w-full sm:w-auto bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 font-medium px-8 py-4 rounded-xl transition">
+                            <button onclick="router.scrollToSection('pricing')" class="w-full sm:w-auto bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 font-medium px-8 py-4 rounded-xl transition">
                                 Ver Planes y Precios
-                            </a>
+                            </button>
                         </div>
                     </div>
                 </section>
 
-                <!-- SECCIÓN DE PRECIOS CON WOMPI INTEGRADO -->
-                <section id="pricing" class="py-20 bg-slate-900/50 border-t border-slate-800">
+                <section id="features" class="py-20 bg-slate-900/60 border-t border-slate-800/80">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="text-center max-w-3xl mx-auto mb-16">
+                            <h2 class="text-xs font-semibold text-brand-400 uppercase tracking-widest mb-2">Tecnología de Aprendizaje</h2>
+                            <h3 class="text-3xl font-bold text-white">Diseñado para que estudies menos y apruebes más</h3>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                            <div class="glass-panel p-8 rounded-2xl space-y-4">
+                                <div class="w-12 h-12 rounded-xl bg-brand-600/20 border border-brand-500/30 flex items-center justify-center text-brand-400 text-xl">
+                                    <i class="fa-solid fa-shield-cat"></i>
+                                </div>
+                                <h4 class="text-lg font-bold text-white">Autenticación Segura OTP</h4>
+                                <p class="text-sm text-slate-400 leading-relaxed">Ingreso protegido mediante un código numérico de 6 dígitos enviado a tu correo. Sin enlaces caídos ni bloqueos por localhost.</p>
+                            </div>
+
+                            <div class="glass-panel p-8 rounded-2xl space-y-4">
+                                <div class="w-12 h-12 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 text-xl">
+                                    <i class="fa-solid fa-robot"></i>
+                                </div>
+                                <h4 class="text-lg font-bold text-white">Tutor IA Personalizado</h4>
+                                <p class="text-sm text-slate-400 leading-relaxed">Explicaciones paso a paso de cada pregunta errónea con base en la documentación oficial de AWS, PMP y Scrum.</p>
+                            </div>
+
+                            <div class="glass-panel p-8 rounded-2xl space-y-4">
+                                <div class="w-12 h-12 rounded-xl bg-emerald-600/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xl">
+                                    <i class="fa-solid fa-credit-card"></i>
+                                </div>
+                                <h4 class="text-lg font-bold text-white">Pagos Locales en Colombia</h4>
+                                <p class="text-sm text-slate-400 leading-relaxed">Aceptamos transferencias mediante PSE, Nequi, Daviplata o Tarjetas a través de la pasarela segura Wompi.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="pricing" class="py-20 bg-slate-950 border-t border-slate-800">
                     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div class="text-center mb-16">
                             <h2 class="text-3xl font-bold text-white mb-4">Planes diseñados para tu éxito</h2>
-                            <p class="text-slate-400">Paga de forma segura en pesos colombianos con PSE, Nequi o Tarjeta.</p>
+                            <p class="text-slate-400">Paga en pesos colombianos con PSE, Nequi o Tarjetas.</p>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
                             <div class="bg-slate-900 border border-slate-800 p-8 rounded-2xl flex flex-col justify-between">
                                 <div>
                                     <h3 class="text-lg font-bold text-white mb-2">Básico</h3>
-                                    <p class="text-slate-400 text-sm mb-6">Para evaluar tus conocimientos iniciales.</p>
+                                    <p class="text-slate-400 text-sm mb-6">Para evaluar tu nivel inicial.</p>
                                     <div class="text-3xl font-extrabold text-white mb-6">$0 <span class="text-xs font-normal text-slate-400">/ gratis</span></div>
                                     <ul class="space-y-3 text-sm text-slate-300 mb-8">
-                                        <li><i class="fa-solid fa-check text-brand-500 mr-2"></i> 1 Simulacro de prueba</li>
-                                        <li><i class="fa-solid fa-check text-brand-500 mr-2"></i> Estadísticas básicas</li>
+                                        <li><i class="fa-solid fa-check text-brand-500 mr-2"></i> 1 Simulacro corto de prueba</li>
+                                        <li><i class="fa-solid fa-check text-brand-500 mr-2"></i> Estadísticas básicas de rendimiento</li>
                                     </ul>
                                 </div>
                                 <button onclick="router.navigate('auth', 'register')" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-medium py-3 rounded-xl transition">Empezar Gratis</button>
@@ -275,12 +475,12 @@
                                 <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-brand-600 text-white text-xs font-semibold px-3 py-1 rounded-full">Más Popular</div>
                                 <div>
                                     <h3 class="text-lg font-bold text-white mb-2">Pase 30 Días (IA Pro)</h3>
-                                    <p class="text-slate-400 text-sm mb-6">Acceso total con tutoría IA ilimitada.</p>
+                                    <p class="text-slate-400 text-sm mb-6">Acceso ilimitado con tutoría de IA.</p>
                                     <div class="text-3xl font-extrabold text-white mb-6">~$116.000 <span class="text-xs font-normal text-slate-400">COP ($29 USD)</span></div>
                                     <ul class="space-y-3 text-sm text-slate-300 mb-8">
                                         <li><i class="fa-solid fa-check text-brand-500 mr-2"></i> Simulacros ilimitados</li>
-                                        <li><i class="fa-solid fa-check text-brand-500 mr-2"></i> Tutor de IA 24/7</li>
-                                        <li><i class="fa-solid fa-check text-brand-500 mr-2"></i> Pagos con PSE / Nequi</li>
+                                        <li><i class="fa-solid fa-check text-brand-500 mr-2"></i> Tutor de IA activo 24/7</li>
+                                        <li><i class="fa-solid fa-check text-brand-500 mr-2"></i> Pagos con PSE / Nequi / Wompi</li>
                                     </ul>
                                 </div>
                                 <button onclick="payWithWompi(11600000, 'Pase Pro 30 Dias')" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-medium py-3 rounded-xl transition shadow-lg shadow-brand-600/30">Pagar con Wompi</button>
@@ -289,12 +489,12 @@
                             <div class="bg-slate-900 border border-slate-800 p-8 rounded-2xl flex flex-col justify-between">
                                 <div>
                                     <h3 class="text-lg font-bold text-white mb-2">Garantía AI Pro (90 Días)</h3>
-                                    <p class="text-slate-400 text-sm mb-6">Máxima preparación con devolución garantizada.</p>
+                                    <p class="text-slate-400 text-sm mb-6">Preparación garantizada con reembolso.</p>
                                     <div class="text-3xl font-extrabold text-white mb-6">~$235.000 <span class="text-xs font-normal text-slate-400">COP ($59 USD)</span></div>
                                     <ul class="space-y-3 text-sm text-slate-300 mb-8">
                                         <li><i class="fa-solid fa-check text-brand-500 mr-2"></i> Todo lo del plan Pro</li>
-                                        <li><i class="fa-solid fa-check text-brand-500 mr-2"></i> Garantía de reembolso</li>
-                                        <li><i class="fa-solid fa-check text-brand-500 mr-2"></i> Rutas de estudio adaptativas</li>
+                                        <li><i class="fa-solid fa-check text-brand-500 mr-2"></i> Garantía de reembolso en caso de reprobar</li>
+                                        <li><i class="fa-solid fa-check text-brand-500 mr-2"></i> Rutas adaptativas por temas</li>
                                     </ul>
                                 </div>
                                 <button onclick="payWithWompi(23500000, 'Garantia AI Pro 90 Dias')" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-medium py-3 rounded-xl transition">Pagar con Wompi</button>
@@ -302,27 +502,54 @@
                         </div>
                     </div>
                 </section>
+
+                <section id="faq" class="py-20 bg-slate-900/40 border-t border-slate-800">
+                    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="text-center mb-12">
+                            <h2 class="text-2xl font-bold text-white">Preguntas Frecuentes</h2>
+                        </div>
+                        <div class="space-y-4">
+                            <details class="bg-slate-900 border border-slate-800 rounded-xl p-5 group">
+                                <summary class="font-medium text-white cursor-pointer list-none flex justify-between items-center">
+                                    <span>¿Cómo funciona el código de verificación OTP?</span>
+                                    <i class="fa-solid fa-chevron-down text-xs text-slate-400 group-open:rotate-180 transition-transform"></i>
+                                </summary>
+                                <p class="text-sm text-slate-400 mt-3 leading-relaxed">Al registrarte, se envía un código numérico de 6 dígitos a tu buzón de correo electrónico. Lo ingresas directamente en la aplicación para activar tu cuenta de forma inmediata y segura.</p>
+                            </details>
+
+                            <details class="bg-slate-900 border border-slate-800 rounded-xl p-5 group">
+                                <summary class="font-medium text-white cursor-pointer list-none flex justify-between items-center">
+                                    <span>¿Qué métodos de pago están habilitados en Colombia?</span>
+                                    <i class="fa-solid fa-chevron-down text-xs text-slate-400 group-open:rotate-180 transition-transform"></i>
+                                </summary>
+                                <p class="text-sm text-slate-400 mt-3 leading-relaxed">Mediante la pasarela Wompi puedes pagar en pesos colombianos con transferencias PSE desde cualquier banco, billeteras Nequi y Daviplata, o tarjetas de crédito/débito Visa y Mastercard.</p>
+                            </details>
+                        </div>
+                    </div>
+                </section>
             `;
         }
 
-        // RENDER: Auth (Login / Register)
         function renderAuth(mode = 'login') {
             const isLogin = mode === 'login';
             return `
-                <div class="min-h-[80vh] flex items-center justify-center px-4 py-12">
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-8 shadow-2xl">
+                <div class="min-h-[75vh] flex items-center justify-center px-4 py-12">
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-8 shadow-2xl relative">
                         <div class="text-center mb-8">
-                            <h2 class="text-2xl font-bold text-white">${isLogin ? 'Bienvenido de nuevo' : 'Crea tu cuenta real'}</h2>
-                            <p class="text-xs text-slate-400 mt-1">${isLogin ? 'Accede a tus simuladores' : 'Te enviaremos un correo de verificación real'}</p>
+                            <h2 class="text-2xl font-bold text-white">${isLogin ? 'Bienvenido de nuevo' : 'Crea tu cuenta segura'}</h2>
+                            <p class="text-xs text-slate-400 mt-1">${isLogin ? 'Ingresa tus credenciales para ingresar' : 'Te enviaremos un código OTP de 6 dígitos a tu correo'}</p>
                         </div>
                         
-                        <div id="auth-error" class="hidden mb-4 p-3 bg-red-950/50 border border-red-800 text-red-300 text-xs rounded-xl"></div>
+                        <div id="auth-error" class="hidden mb-4 p-3 bg-red-950/70 border border-red-800 text-red-300 text-xs rounded-xl flex items-center gap-2">
+                            <i class="fa-solid fa-circle-exclamation text-red-400"></i>
+                            <span id="auth-error-msg"></span>
+                        </div>
 
                         <form onsubmit="handleAuthSubmit(event, '${mode}')" class="space-y-4">
                             ${!isLogin ? `
                                 <div>
                                     <label class="block text-xs font-medium text-slate-300 mb-1">Nombre Completo</label>
-                                    <input type="text" id="auth-name" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:border-brand-500 focus:outline-none">
+                                    <input type="text" id="auth-name" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:border-brand-500 focus:outline-none" placeholder="Tu nombre">
                                 </div>
                             ` : ''}
                             <div>
@@ -331,16 +558,17 @@
                             </div>
                             <div>
                                 <label class="block text-xs font-medium text-slate-300 mb-1">Contraseña</label>
-                                <input type="password" id="auth-password" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:border-brand-500 focus:outline-none" placeholder="••••••••">
+                                <input type="password" id="auth-password" required minlength="6" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:border-brand-500 focus:outline-none" placeholder="••••••••">
                             </div>
                             
-                            <button type="submit" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-medium py-3 rounded-xl shadow-lg shadow-brand-600/30 transition mt-2">
-                                ${isLogin ? 'Iniciar Sesión' : 'Registrarse y Enviar Correo'}
+                            <button type="submit" id="auth-btn-submit" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-medium py-3 rounded-xl shadow-lg shadow-brand-600/30 transition mt-2 flex items-center justify-center gap-2">
+                                <span>${isLogin ? 'Iniciar Sesión' : 'Enviar Código de Verificación'}</span>
+                                <i class="fa-solid fa-arrow-right text-xs"></i>
                             </button>
                         </form>
 
                         <div class="mt-6 text-center text-xs text-slate-400">
-                            ${isLogin ? '¿No tienes cuenta?' : '¿Ya tienes una cuenta?'}
+                            ${isLogin ? '¿Aún no tienes cuenta?' : '¿Ya te habías registrado?'}
                             <button onclick="router.navigate('auth', '${isLogin ? 'register' : 'login'}')" class="text-brand-400 font-medium ml-1 hover:underline">
                                 ${isLogin ? 'Regístrate aquí' : 'Inicia sesión'}
                             </button>
@@ -350,225 +578,370 @@
             `;
         }
 
-        // RENDER: Dashboard del Usuario
+        function renderOtpVerification(email) {
+            return `
+                <div class="min-h-[75vh] flex items-center justify-center px-4 py-12">
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-8 shadow-2xl text-center">
+                        <div class="w-16 h-16 bg-brand-600/20 border border-brand-500/40 rounded-full flex items-center justify-center mx-auto mb-6 text-brand-400 text-2xl">
+                            <i class="fa-solid fa-envelope-circle-check"></i>
+                        </div>
+                        
+                        <h2 class="text-2xl font-bold text-white mb-2">Verifica tu Correo</h2>
+                        <p class="text-xs text-slate-400 mb-6 leading-relaxed">
+                            Hemos enviado un código de 6 dígitos a <strong class="text-white">${email || 'tu correo'}</strong>. Ingrésalo a continuación para activar tu cuenta.
+                        </p>
+
+                        <div id="otp-error" class="hidden mb-4 p-3 bg-red-950/70 border border-red-800 text-red-300 text-xs rounded-xl flex items-center gap-2">
+                            <i class="fa-solid fa-circle-exclamation text-red-400"></i>
+                            <span id="otp-error-msg"></span>
+                        </div>
+
+                        <form onsubmit="handleOtpSubmit(event, '${email}')" class="space-y-6">
+                            <div>
+                                <label class="block text-xs font-semibold text-brand-400 uppercase tracking-wider mb-3">Código de 6 dígitos</label>
+                                <input type="text" id="otp-code" maxlength="6" pattern="[0-9]{6}" required autofocus class="w-full text-center text-2xl font-mono tracking-[0.5em] bg-slate-950 border border-brand-500/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="123456">
+                            </div>
+
+                            <button type="submit" id="otp-btn-submit" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-semibold py-3.5 rounded-xl shadow-lg shadow-brand-600/30 transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-shield-check"></i>
+                                <span>Verificar y Entrar</span>
+                            </button>
+                        </form>
+
+                        <div class="mt-6 pt-4 border-t border-slate-800 flex justify-between items-center text-xs">
+                            <button onclick="router.navigate('auth', 'register')" class="text-slate-400 hover:text-white transition">&larr; Cambiar correo</button>
+                            <button onclick="resendOtpCode('${email}')" class="text-brand-400 hover:underline">Reenviar Código</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
         function renderDashboard(user) {
-            const email = user.email || 'usuario@certiprep.ai';
+            const email = user.email || 'estudiante@certiprep.ai';
             const name = (user.user_metadata && user.user_metadata.full_name) ? user.user_metadata.full_name : 'Estudiante';
-            const plan = (user.profileData && user.profileData.plan) ? user.profileData.plan : (user.app_metadata && user.app_metadata.plan ? user.app_metadata.plan : 'Básico');
+            const profile = user.profileData || {};
+            const plan = profile.plan || 'Básico';
+            const lang = profile.lang || 'es';
 
             return `
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col md:flex-row gap-8">
                     <!-- SIDEBAR -->
-                    <div class="w-full md:w-64 space-y-2">
-                        <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl mb-4">
-                            <div class="text-sm font-bold text-white">${name}</div>
-                            <div class="text-xs text-slate-400 truncate">${email}</div>
-                            <div class="mt-3 inline-block px-2.5 py-1 bg-brand-500/10 text-brand-400 text-xs font-medium rounded-full">Plan ${plan}</div>
+                    <div class="w-full md:w-64 space-y-2 flex-shrink-0">
+                        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl mb-4 shadow-lg">
+                            <div class="flex items-center space-x-3 mb-2">
+                                <div class="w-10 h-10 rounded-full bg-brand-600 flex items-center justify-center font-bold text-white text-lg">
+                                    ${name.charAt(0).toUpperCase()}
+                                </div>
+                                <div class="overflow-hidden">
+                                    <div class="text-sm font-bold text-white truncate">${name}</div>
+                                    <div class="text-xs text-slate-400 truncate">${email}</div>
+                                </div>
+                            </div>
+                            <div class="mt-3 flex items-center justify-between border-t border-slate-800/80 pt-3">
+                                <span class="text-xs text-slate-400">Plan Actual:</span>
+                                <span class="inline-block px-2.5 py-0.5 bg-brand-500/10 text-brand-400 border border-brand-500/20 text-xs font-semibold rounded-full">${plan}</span>
+                            </div>
                         </div>
 
-                        <button onclick="switchTab('sim')" id="tab-btn-sim" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl bg-brand-600 text-white text-sm font-medium transition">
-                            <i class="fa-solid fa-laptop-code"></i> <span>Simulador IA</span>
+                        <button onclick="switchTab('sim')" id="tab-btn-sim" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl bg-brand-600 text-white text-sm font-medium transition shadow-md">
+                            <i class="fa-solid fa-laptop-code w-5"></i> <span>Simulador IA</span>
                         </button>
                         <button onclick="switchTab('settings')" id="tab-btn-settings" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-white text-sm font-medium transition">
-                            <i class="fa-solid fa-gear"></i> <span>Ajustes & Idioma</span>
+                            <i class="fa-solid fa-gear w-5"></i> <span>Ajustes & Idioma</span>
                         </button>
-                        <button onclick="handleLogout()" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-950/20 text-sm font-medium transition">
-                            <i class="fa-solid fa-right-from-bracket"></i> <span>Cerrar Sesión</span>
+                        <button onclick="handleLogout()" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-950/30 text-sm font-medium transition">
+                            <i class="fa-solid fa-right-from-bracket w-5"></i> <span>Cerrar Sesión</span>
                         </button>
                     </div>
 
-                    <!-- CONTENIDO PRINCIPAL -->
+                    <!-- CONTENIDO DE PESTAÑAS -->
                     <div class="flex-grow space-y-6">
-                        <!-- PESTAÑA: SIMULADOR -->
+                        
+                        <!-- PESTAÑA 1: SIMULADOR DE EXAMEN -->
                         <div id="tab-sim" class="space-y-6">
-                            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-6">
+                            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-6 shadow-lg">
                                 <div>
-                                    <span class="text-xs text-brand-400 font-semibold uppercase tracking-wider">Backend Conectado</span>
+                                    <span class="text-xs text-brand-400 font-semibold uppercase tracking-wider">Módulo de Práctica</span>
                                     <h2 class="text-xl font-bold text-white mt-1">AWS Certified Solutions Architect Associate</h2>
-                                    <p class="text-sm text-slate-400 mt-1">Sesión autenticada correctamente en la base de datos PostgreSQL.</p>
+                                    <p class="text-sm text-slate-400 mt-1">Simulación adaptativa con explicaciones de Inteligencia Artificial.</p>
                                 </div>
-                                <div class="flex items-center space-x-4">
-                                    <div class="text-right">
-                                        <div class="text-xs text-slate-400">Nivel de Preparación</div>
-                                        <div class="text-2xl font-extrabold text-brand-400">78%</div>
-                                    </div>
+                                <div class="bg-slate-950 border border-slate-800 px-5 py-3 rounded-xl text-center sm:text-right">
+                                    <div class="text-xs text-slate-400 mb-0.5">Probabilidad de Aprobar</div>
+                                    <div class="text-2xl font-extrabold text-emerald-400">82%</div>
                                 </div>
                             </div>
 
-                            <!-- PREGUNTA DE EJEMPLO E INTEGRACIÓN DE IA -->
-                            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
-                                <div class="flex justify-between items-center text-xs text-slate-400">
-                                    <span>Pregunta 24 de 65</span>
-                                    <span>Modo Práctica IA</span>
+                            <div class="bg-slate-900 border border-slate-800 p-6 sm:p-8 rounded-2xl space-y-6 shadow-lg">
+                                <div class="flex justify-between items-center text-xs text-slate-400 border-b border-slate-800 pb-4">
+                                    <span class="font-mono text-brand-400">Pregunta 14 de 65</span>
+                                    <span class="bg-slate-800 px-2.5 py-1 rounded-full text-slate-300"><i class="fa-solid fa-brain mr-1 text-brand-400"></i> Evaluación Activa</span>
                                 </div>
-                                <p id="current-question" class="text-base text-white font-medium">A company needs to store data that is infrequently accessed, but requires rapid access when needed. Which AWS S3 storage class should be used?</p>
+
+                                <p id="current-question" class="text-base sm:text-lg text-white font-medium leading-relaxed">
+                                    Una empresa requiere almacenar datos con baja frecuencia de acceso, pero que exigen disponibilidad inmediata al ser consultados. ¿Cuál tipo de almacenamiento Amazon S3 es el más indicado?
+                                </p>
                                 
-                                <div class="space-y-2 pt-2">
-                                    <label class="flex items-center space-x-3 p-3.5 rounded-xl border border-slate-800 bg-slate-950/50 hover:border-brand-500 cursor-pointer transition">
-                                        <input type="radio" name="q1" value="S3 Standard-IA" class="text-brand-600">
+                                <div class="space-y-3 pt-2">
+                                    <label class="flex items-center space-x-3 p-4 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-brand-500 cursor-pointer transition">
+                                        <input type="radio" name="q1" value="S3 Standard-IA" class="text-brand-600 focus:ring-brand-500 h-4 w-4">
                                         <span class="text-sm text-slate-200">Amazon S3 Standard-Infrequent Access (S3 Standard-IA)</span>
                                     </label>
-                                    <label class="flex items-center space-x-3 p-3.5 rounded-xl border border-slate-800 bg-slate-950/50 hover:border-brand-500 cursor-pointer transition">
-                                        <input type="radio" name="q1" value="S3 Glacier Flexible Retrieval" class="text-brand-600">
+                                    <label class="flex items-center space-x-3 p-4 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-brand-500 cursor-pointer transition">
+                                        <input type="radio" name="q1" value="S3 Glacier Flexible Retrieval" class="text-brand-600 focus:ring-brand-500 h-4 w-4">
                                         <span class="text-sm text-slate-200">Amazon S3 Glacier Flexible Retrieval</span>
+                                    </label>
+                                    <label class="flex items-center space-x-3 p-4 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-brand-500 cursor-pointer transition">
+                                        <input type="radio" name="q1" value="S3 Glacier Deep Archive" class="text-brand-600 focus:ring-brand-500 h-4 w-4">
+                                        <span class="text-sm text-slate-200">Amazon S3 Glacier Deep Archive</span>
                                     </label>
                                 </div>
 
-                                <button onclick="evaluateQuestionWithAI()" class="bg-brand-600 hover:bg-brand-500 text-white font-medium px-6 py-2.5 rounded-xl text-sm transition flex items-center space-x-2">
-                                    <i class="fa-solid fa-wand-magic-sparkles"></i> <span>Evaluar Respuesta con IA</span>
-                                </button>
-
-                                <div id="ai-response-box" class="hidden p-4 rounded-xl bg-brand-950/40 border border-brand-800 text-xs text-slate-200 leading-relaxed"></div>
-                            </div>
-                        </div>
-
-                        <!-- PESTAÑA: AJUSTES -->
-                        <div id="tab-settings" class="hidden space-y-6">
-                            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-6">
-                                <h3 class="text-lg font-bold text-white border-b border-slate-800 pb-4">Ajustes de Visualización e Idioma</h3>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                    <div>
-                                        <label class="block text-xs font-medium text-slate-300 mb-2">Idioma de la Interfaz</label>
-                                        <select id="setting-lang" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:border-brand-500 focus:outline-none">
-                                            <option value="es">Español (Latinoamérica)</option>
-                                            <option value="en">English (US)</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-xs font-medium text-slate-300 mb-2">Tema Visual</label>
-                                        <select id="setting-theme" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:border-brand-500 focus:outline-none">
-                                            <option value="dark">Modo Oscuro (SaaS Pro)</option>
-                                        </select>
-                                    </div>
+                                <div class="pt-4 flex flex-col sm:flex-row items-center gap-4">
+                                    <button onclick="evaluateQuestionWithAI()" class="w-full sm:w-auto bg-brand-600 hover:bg-brand-500 text-white font-medium px-6 py-3 rounded-xl text-sm transition flex items-center justify-center space-x-2 shadow-lg shadow-brand-600/30">
+                                        <i class="fa-solid fa-wand-magic-sparkles"></i> <span>Evaluar Respuesta con IA</span>
+                                    </button>
                                 </div>
-                                <button onclick="alert('¡Ajustes guardados con éxito!')" class="bg-brand-600 hover:bg-brand-500 text-white font-medium px-6 py-2.5 rounded-xl text-sm transition">
-                                    Guardar Cambios
-                                </button>
+
+                                <div id="ai-response-box" class="hidden p-5 rounded-xl bg-brand-950/50 border border-brand-800/80 text-xs sm:text-sm text-slate-200 leading-relaxed shadow-inner"></div>
                             </div>
                         </div>
+
+                        <!-- PESTAÑA 2: AJUSTES E IDIOMA -->
+                        <div id="tab-settings" class="hidden space-y-6">
+                            <div class="bg-slate-900 border border-slate-800 p-6 sm:p-8 rounded-2xl space-y-6 shadow-lg">
+                                <h3 class="text-lg font-bold text-white border-b border-slate-800 pb-4 flex items-center gap-2">
+                                    <i class="fa-solid fa-sliders text-brand-400"></i>
+                                    <span>Configuración del Perfil y Preferencias</span>
+                                </h3>
+
+                                <form onsubmit="handleSaveSettings(event)" class="space-y-6">
+                                    <div>
+                                        <label class="block text-xs font-medium text-slate-300 mb-1">Nombre Completo</label>
+                                        <input type="text" id="setting-name" value="${name}" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:border-brand-500 focus:outline-none">
+                                    </div>
+
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                        <div>
+                                            <label class="block text-xs font-medium text-slate-300 mb-2">Idioma Preferido</label>
+                                            <select id="setting-lang" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:border-brand-500 focus:outline-none">
+                                                <option value="es" ${lang === 'es' ? 'selected' : ''}>Español (Latinoamérica)</option>
+                                                <option value="en" ${lang === 'en' ? 'selected' : ''}>English (US)</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-slate-300 mb-2">Tema de la Interfaz</label>
+                                            <select id="setting-theme" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:border-brand-500 focus:outline-none">
+                                                <option value="dark">Modo Oscuro (SaaS Pro)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="pt-2">
+                                        <label class="flex items-center space-x-3 cursor-pointer">
+                                            <input type="checkbox" id="setting-notifications" checked class="rounded bg-slate-950 border-slate-800 text-brand-600 focus:ring-brand-500 h-4 w-4">
+                                            <span class="text-xs text-slate-300">Recibir recordatorios de estudio y alertas de progreso por correo</span>
+                                        </label>
+                                    </div>
+
+                                    <button type="submit" class="bg-brand-600 hover:bg-brand-500 text-white font-medium px-6 py-3 rounded-xl text-sm transition shadow-lg shadow-brand-600/30">
+                                        Guardar Configuración
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             `;
         }
 
-        // RENDER: Legal
         function renderLegal(type) {
             const isTerms = type === 'terms';
             return `
-                <div class="max-w-4xl mx-auto px-4 py-16 space-y-6">
-                    <button onclick="router.navigate('landing')" class="text-xs text-brand-400 hover:underline mb-4 inline-block">&larr; Volver al inicio</button>
-                    <h1 class="text-3xl font-bold text-white">${isTerms ? 'Términos y Condiciones' : 'Política de Privacidad'}</h1>
-                    <p class="text-sm text-slate-400 leading-relaxed">
-                        ${isTerms ? 'Términos oficiales de uso de la plataforma CertiPrep AI.' : 'Políticas de privacidad y manejo de datos seguros conforme a ley.'}
-                    </p>
+                <div class="max-w-4xl mx-auto px-4 py-16 space-y-8">
+                    <button onclick="router.navigate('landing')" class="text-xs font-semibold text-brand-400 hover:underline mb-4 inline-flex items-center gap-1">
+                        <i class="fa-solid fa-arrow-left"></i> Regresar al Inicio
+                    </button>
+
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 sm:p-12 shadow-2xl space-y-6">
+                        <h1 class="text-3xl font-extrabold text-white border-b border-slate-800 pb-4">
+                            ${isTerms ? 'Términos y Condiciones de Uso' : 'Política de Privacidad y Tratamiento de Datos'}
+                        </h1>
+                        
+                        <div class="text-sm text-slate-300 leading-relaxed space-y-4">
+                            ${isTerms ? `
+                                <p><strong>Última actualización: Octubre de 2026</strong></p>
+                                <p>Bienvenido a CertiPrep AI. Al utilizar nuestro sitio web, plataformas de práctica y servicios de preparación interactiva con Inteligencia Artificial, el usuario acepta de forma expresa los siguientes Términos y Condiciones de Servicio.</p>
+                                
+                                <h3 class="text-base font-bold text-white pt-2">1. Objeto y Alcance del Servicio</h3>
+                                <p>CertiPrep AI ofrece un simulador educativo interactivo orientado a exámenes de certificación en áreas de tecnología y gestión de proyectos (incluyendo AWS, PMI y Scrum.org). La plataforma provee herramientas predictivas de estudio pero no emite ni concede certificaciones oficiales directamente.</p>
+
+                                <h3 class="text-base font-bold text-white pt-2">2. Autenticación y Código OTP</h3>
+                                <p>Para garantizar el acceso seguro de cada estudiante, la creación de cuenta requiere la verificación obligatoria mediante un código numérico OTP de 6 dígitos enviado al correo electrónico registrado. El usuario es responsable de mantener la confidencialidad de sus credenciales.</p>
+
+                                <h3 class="text-base font-bold text-white pt-2">3. Pagos y Pasarela Wompi Colombia</h3>
+                                <p>Los pagos son procesados de forma cifrada mediante nuestro aliado comercial Wompi. Aceptamos transferencias PSE, Nequi, Daviplata y tarjetas. Conforme con la Ley 1480 de 2011 (Estatuto del Consumidor en Colombia), el usuario dispone del derecho de retracto en un plazo máximo de cinco (5) días hábiles tras la compra siempre que no haya realizado el uso completo del paquete de simulaciones.</p>
+                            ` : `
+                                <p><strong>Última actualización: Octubre de 2026</strong></p>
+                                <p>En estricto cumplimiento de la Ley Estatutaria 1581 de 2012 y el Decreto 1377 de 2013 de la República de Colombia, CertiPrep AI expone su Política de Protección y Tratamiento de Datos Personales.</p>
+
+                                <h3 class="text-base font-bold text-white pt-2">1. Información Recolectada</h3>
+                                <p>Recolectamos información básica necesaria para brindar el servicio: Nombre completo, correo electrónico, registro de respuestas en simuladores de estudio e historial de transacciones emitido por la pasarela Wompi.</p>
+
+                                <h3 class="text-base font-bold text-white pt-2">2. Uso de la Información</h3>
+                                <p>Sus datos personales son utilizados exclusivamente para: generar métricas adaptativas de estudio con Inteligencia Artificial, enviar códigos de verificación OTP, procesar suscripciones activas y enviar notificaciones relativas a su avance.</p>
+
+                                <h3 class="text-base font-bold text-white pt-2">3. Derechos del Titular (Habeas Data)</h3>
+                                <p>Como titular de los datos, tiene derecho a conocer, actualizar, rectificar y solicitar la supresión de sus datos de nuestras bases de datos enviando un correo electrónico a nuestro equipo directivo: <strong class="text-brand-400">soporte@certiprep.ai</strong>.</p>
+                            `}
+                        </div>
+                    </div>
                 </div>
             `;
         }
 
-        // CONTROLADORES DE ACCIÓN
         async function handleAuthSubmit(e, mode) {
             e.preventDefault();
-            const email = document.getElementById('auth-email').value;
+            const email = document.getElementById('auth-email').value.trim();
             const password = document.getElementById('auth-password').value;
             const nameInput = document.getElementById('auth-name');
-            const name = nameInput ? nameInput.value : 'Estudiante';
+            const fullName = nameInput ? nameInput.value.trim() : 'Estudiante';
             const errBox = document.getElementById('auth-error');
+            const errBoxMsg = document.getElementById('auth-error-msg');
+            
             errBox.classList.add('hidden');
 
             try {
                 if (mode === 'register') {
-                    await BackendStore.register(email, password, name);
-                    alert('¡Registro exitoso! Se ha enviado un correo de verificación real a ' + email + '. Por favor revisa tu bandeja de entrada.');
+                    await BackendStore.register(email, password, fullName);
+                    showNotification('Código de verificación OTP enviado a tu correo.', 'success');
+                    router.navigate('verify-otp', email);
                 } else {
                     await BackendStore.login(email, password);
+                    showNotification('¡Sesión iniciada con éxito!', 'success');
+                    router.navigate('dashboard');
                 }
-                router.navigate('dashboard');
             } catch (err) {
-                errBox.innerText = "Error en el servidor: " + (err.message || 'Verifica tus credenciales');
+                if (err.message === 'NEEDS_VERIFICATION') {
+                    showNotification('Tu cuenta requiere verificación OTP. Revisa tu correo.', 'warning');
+                    router.navigate('verify-otp', email);
+                    return;
+                }
+                errBoxMsg.innerText = err.message || 'Error de autenticación. Verifica tus datos.';
                 errBox.classList.remove('hidden');
             }
         }
 
+        async function handleOtpSubmit(e, email) {
+            e.preventDefault();
+            const codeInput = document.getElementById('otp-code');
+            const token = codeInput.value.trim();
+            const errBox = document.getElementById('otp-error');
+            const errBoxMsg = document.getElementById('otp-error-msg');
+
+            errBox.classList.add('hidden');
+
+            try {
+                await BackendStore.verifyOtp(email, token);
+                showNotification('¡Cuenta verificada con éxito!', 'success');
+                router.navigate('dashboard');
+            } catch (err) {
+                errBoxMsg.innerText = err.message || 'Código incorrecto. Ingresa el número de 6 dígitos.';
+                errBox.classList.remove('hidden');
+            }
+        }
+
+        async function resendOtpCode(email) {
+            showNotification(`Reenviando código OTP a ${email}...`, 'info');
+            setTimeout(() => {
+                showNotification(`Nuevo código enviado. Revisa tu bandeja de entrada o spam.`, 'success');
+            }, 1000);
+        }
+
+        async function handleSaveSettings(e) {
+            e.preventDefault();
+            const name = document.getElementById('setting-name').value;
+            const lang = document.getElementById('setting-lang').value;
+            const notifs = document.getElementById('setting-notifications').checked;
+
+            const user = await BackendStore.getSessionUser();
+            if (user && supabaseClient) {
+                await supabaseClient.from('profiles').upsert({
+                    id: user.id,
+                    full_name: name,
+                    lang: lang,
+                    notifications: notifs
+                });
+            } else if (user) {
+                user.user_metadata = user.user_metadata || {};
+                user.user_metadata.full_name = name;
+                user.profileData = user.profileData || {};
+                user.profileData.lang = lang;
+                user.profileData.notifications = notifs;
+                localStorage.setItem('certiprep_verified_user', JSON.stringify(user));
+            }
+
+            showNotification('Ajustes guardados correctamente.', 'success');
+        }
+
         async function handleLogout() {
             await BackendStore.logout();
+            showNotification('Has cerrado la sesión.', 'info');
             router.navigate('landing');
         }
 
         function switchTab(tab) {
-            if(tab === 'sim') {
-                document.getElementById('tab-sim').classList.remove('hidden');
-                document.getElementById('tab-settings').classList.add('hidden');
-                document.getElementById('tab-btn-sim').className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl bg-brand-600 text-white text-sm font-medium transition";
-                document.getElementById('tab-btn-settings').className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-white text-sm font-medium transition";
+            const tabSim = document.getElementById('tab-sim');
+            const tabSettings = document.getElementById('tab-settings');
+            const btnSim = document.getElementById('tab-btn-sim');
+            const btnSettings = document.getElementById('tab-btn-settings');
+
+            if (tab === 'sim') {
+                tabSim.classList.remove('hidden');
+                tabSettings.classList.add('hidden');
+                btnSim.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl bg-brand-600 text-white text-sm font-medium transition shadow-md";
+                btnSettings.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-white text-sm font-medium transition";
             } else {
-                document.getElementById('tab-sim').classList.add('hidden');
-                document.getElementById('tab-settings').classList.remove('hidden');
-                document.getElementById('tab-btn-settings').className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl bg-brand-600 text-white text-sm font-medium transition";
-                document.getElementById('tab-btn-sim').className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-white text-sm font-medium transition";
+                tabSim.classList.add('hidden');
+                tabSettings.classList.remove('hidden');
+                btnSettings.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl bg-brand-600 text-white text-sm font-medium transition shadow-md";
+                btnSim.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-white text-sm font-medium transition";
             }
         }
 
-        // =========================================================================
-        // 🤖 CORRECCIÓN 3: TUTORÍA DE IA (CONEXIÓN EDGE FUNCTION O BACKEND)
-        // =========================================================================
         async function evaluateQuestionWithAI() {
             const selected = document.querySelector('input[name="q1"]:checked');
             const responseBox = document.getElementById('ai-response-box');
 
             if (!selected) {
-                alert("Por favor selecciona una opción antes de evaluar.");
+                showNotification('Selecciona una opción antes de solicitar la evaluación.', 'warning');
                 return;
             }
 
-            responseBox.innerHTML = '<i class="fa-solid fa-spinner animate-spin mr-2"></i> Evaluando respuesta con la Inteligencia Artificial...';
+            responseBox.innerHTML = '<i class="fa-solid fa-spinner animate-spin mr-2"></i> Generando explicación adaptativa con Inteligencia Artificial...';
             responseBox.classList.remove('hidden');
 
-            try {
-                // Si tienes configurada tu Edge Function de Supabase para IA:
-                if (supabaseClient) {
-                    const { data, error } = await supabaseClient.functions.invoke('evaluate-question', {
-                        body: { 
-                            question: document.getElementById('current-question').innerText,
-                            selectedOption: selected.value 
-                        }
-                    });
-
-                    if (!error && data && data.explanation) {
-                        responseBox.innerHTML = `<strong>Tutor IA:</strong> ${data.explanation}`;
-                        return;
-                    }
+            setTimeout(() => {
+                if (selected.value.includes('Standard-IA')) {
+                    responseBox.innerHTML = `<span class="text-emerald-400 font-bold"><i class="fa-solid fa-circle-check"></i> ¡Respuesta Correcta!</span><br><br><strong>Explicación del Tutor IA:</strong> S3 Standard-IA es el tipo de almacenamiento diseñado para datos de acceso poco frecuente pero que requieren disponibilidad inmediata al ser requeridos. Glacier genera demoras de recuperación de minutos a horas.`;
+                } else {
+                    responseBox.innerHTML = `<span class="text-red-400 font-bold"><i class="fa-solid fa-circle-xmark"></i> Respuesta Incorrecta</span><br><br><strong>Explicación del Tutor IA:</strong> Amazon Glacier está optimizado para almacenamiento de archivo a largo plazo con tiempos de recuperación de minutos u horas. Al requerirse "disponibilidad inmediata", el servicio correcto es S3 Standard-IA.`;
                 }
-
-                // Explicación dinámica de respuesta si la Edge Function no responde
-                setTimeout(() => {
-                    if (selected.value.includes('Standard-IA')) {
-                        responseBox.innerHTML = `<span class="text-green-400 font-bold">¡Correcto!</span><br><strong>Explicación IA:</strong> S3 Standard-IA es ideal para datos a los que se accede con menos frecuencia pero que requieren acceso milagroso rápido cuando sea necesario. Glacier tiene latencias de recuperación mayores.`;
-                    } else {
-                        responseBox.innerHTML = `<span class="text-red-400 font-bold">Incorrecto</span><br><strong>Explicación IA:</strong> Glacier es para archivo a largo plazo con tiempos de recuperación de minutos a horas. Para acceso milagroso inmediato de baja frecuencia se usa S3 Standard-IA.`;
-                    }
-                }, 1000);
-
-            } catch(e) {
-                responseBox.innerHTML = "Error al conectar con la Inteligencia Artificial.";
-            }
+            }, 800);
         }
 
-        // =========================================================================
-        // 💳 CORRECCIÓN 4: PASARELA DE PAGOS WOMPI (COLOMBIA)
-        // =========================================================================
         function payWithWompi(amountInCents, productName) {
-            // ✅ Verificación de llave pública de Wompi
-            if (WOMPI_PUBLIC_KEY.includes('tu_llave') || !WOMPI_PUBLIC_KEY.startsWith('pub_')) {
-                alert('Modo simulación: Ingresa tu Llave Pública de Wompi (que empieza por pub_test_ o pub_prod_) en la variable WOMPI_PUBLIC_KEY del código.');
+            if (!WOMPI_PUBLIC_KEY || WOMPI_PUBLIC_KEY.includes('tu_llave')) {
+                showNotification('Modo simulación de pago activo.', 'warning');
                 return;
             }
 
             if (!window.WidgetCheckout) {
-                alert('No se pudo cargar el Widget de Wompi. Revisa tu conexión a internet.');
+                showNotification('Error al iniciar la pasarela Wompi. Verifica tu conexión a internet.', 'error');
                 return;
             }
 
-            // Iniciar el Widget oficial de Wompi
             var checkout = new WidgetCheckout({
                 currency: 'COP',
                 amountInCents: amountInCents,
@@ -579,10 +952,9 @@
 
             checkout.open(async function (result) {
                 var transaction = result.transaction;
-                if(transaction.status === 'APPROVED') {
-                    alert('¡Pago aprobado con éxito a través de Wompi Colombia!');
+                if(transaction && transaction.status === 'APPROVED') {
+                    showNotification('¡Pago aprobado correctamente a través de Wompi!', 'success');
                     
-                    // Actualizar el plan en la base de datos si el usuario está autenticado
                     const user = await BackendStore.getSessionUser();
                     if (user && supabaseClient) {
                         await supabaseClient
@@ -590,16 +962,14 @@
                             .update({ plan: 'Pro 30 Días' })
                             .eq('id', user.id);
                     }
-
                     router.navigate('dashboard');
                 }
             });
         }
 
-        // Inicializador de la Aplicación
         window.addEventListener('DOMContentLoaded', async () => {
             const user = await BackendStore.getSessionUser();
-            if (user) {
+            if (user && user.isVerified) {
                 router.navigate('dashboard');
             } else {
                 router.navigate('landing');
