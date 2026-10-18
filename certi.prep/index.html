@@ -113,33 +113,56 @@
 
     <!-- JAVASCRIPT: CONFIGURACIÓN DE BACKEND Y CONTROLADORES -->
     <script>
-        // ==========================================
-        // CONFIGURACIÓN DE CREDENCIALES REALES
-        // ==========================================
-        // Reemplaza estas variables con tus datos reales de Supabase y Wompi
-        const SUPABASE_URL = 'https://roknztgkfzyndfexcllv.supabase.co/rest/v1/'; // <--- Pon tu URL de Supabase
-        const SUPABASE_ANON_KEY = 'sb_publishable_D-ATLuZXPBgtCa1dhCBcqg_86kZyNcR';    // <--- Pon tu Anon Key de Supabase
-        const WOMPI_PUBLIC_KEY = 'pub_test_tu_llave_wompi';    // <--- Pon tu Llave Pública de Wompi (Colombia)
+        // =========================================================================
+        //   CORRECCIÓN 1: CREDENCIALES
+        // =========================================================================
+        
+        // CORRECCIÓN: Eliminado '/rest/v1/' para que el SDK de Supabase funcione correctamente.
+        const SUPABASE_URL = 'https://roknztgkfzyndfexcllv.supabase.co'; 
+
+        // Anon Key pública de Supabase
+        const SUPABASE_ANON_KEY = 'sb_publishable_D-ATLuZXPBgtCa1dhCBcqg_86kZyNcR'; 
+
+        // Llave Pública de Wompi (Remplazar con 'pub_test_...' o 'pub_prod_...' del Dashboard Wompi)
+        const WOMPI_PUBLIC_KEY = 'pub_prod_Cku7YXMh34ncyvyPeMv5zpiCsfgMAV8R'; 
 
         // Inicializar cliente Supabase de forma segura
         let supabaseClient = null;
         try {
-            if (SUPABASE_URL.startsWith('https://')) {
+            if (SUPABASE_URL.startsWith('https://') && !SUPABASE_URL.includes('/rest/v1')) {
                 supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                console.log("Conexión con Supabase inicializada con éxito.");
             }
         } catch(e) {
-            console.warn("Modo simulación activado: credenciales de Supabase pendientes de configurar.");
+            console.warn("Modo simulación activado: Verifica las credenciales de Supabase.", e);
         }
 
-        // Sistema de Gestión de Estado e Hibridación Local/Nube
+        // =========================================================================
+        //     CORRECCIÓN 2: PERSISTENCIA REAL EN BASE DE DATOS Y AUTENTICACIÓN
+        // =========================================================================
         const BackendStore = {
+            // Obtener el usuario autenticado actualmente
             getSessionUser: async () => {
                 if (supabaseClient) {
                     const { data: { session } } = await supabaseClient.auth.getSession();
-                    if (session && session.user) return session.user;
+                    if (session && session.user) {
+                        // Consultar datos adicionales de la tabla 'profiles' en PostgreSQL
+                        const { data: profile } = await supabaseClient
+                            .from('profiles')
+                            .select('*')
+                            .eq('id', session.user.id)
+                            .maybeSingle();
+                        
+                        return {
+                            ...session.user,
+                            profileData: profile
+                        };
+                    }
                 }
                 return JSON.parse(localStorage.getItem('certiprep_fallback_user') || 'null');
             },
+
+            // Registro real de usuario con envío de correo de verificación
             register: async (email, password, fullName) => {
                 if (supabaseClient) {
                     const { data, error } = await supabaseClient.auth.signUp({
@@ -147,6 +170,7 @@
                         password,
                         options: {
                             data: { full_name: fullName },
+                            // Redirecciona automáticamente al origen actual (localhost o hosting)
                             emailRedirectTo: window.location.origin
                         }
                     });
@@ -159,6 +183,8 @@
                     return mockUser;
                 }
             },
+
+            // Inicio de sesión con correo y contraseña
             login: async (email, password) => {
                 if (supabaseClient) {
                     const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
@@ -170,6 +196,8 @@
                     return mockUser;
                 }
             },
+
+            // Cerrar sesión
             logout: async () => {
                 if (supabaseClient) await supabaseClient.auth.signOut();
                 localStorage.removeItem('certiprep_fallback_user');
@@ -222,7 +250,7 @@
                     </div>
                 </section>
 
-                <!-- SECCIÓN DE PRECIOS -->
+                <!-- SECCIÓN DE PRECIOS CON WOMPI INTEGRADO -->
                 <section id="pricing" class="py-20 bg-slate-900/50 border-t border-slate-800">
                     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div class="text-center mb-16">
@@ -326,7 +354,7 @@
         function renderDashboard(user) {
             const email = user.email || 'usuario@certiprep.ai';
             const name = (user.user_metadata && user.user_metadata.full_name) ? user.user_metadata.full_name : 'Estudiante';
-            const plan = (user.app_metadata && user.app_metadata.plan) ? user.app_metadata.plan : 'Básico';
+            const plan = (user.profileData && user.profileData.plan) ? user.profileData.plan : (user.app_metadata && user.app_metadata.plan ? user.app_metadata.plan : 'Básico');
 
             return `
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col md:flex-row gap-8">
@@ -357,7 +385,7 @@
                                 <div>
                                     <span class="text-xs text-brand-400 font-semibold uppercase tracking-wider">Backend Conectado</span>
                                     <h2 class="text-xl font-bold text-white mt-1">AWS Certified Solutions Architect Associate</h2>
-                                    <p class="text-sm text-slate-400 mt-1">Sesión autenticada correctamente en la base de datos.</p>
+                                    <p class="text-sm text-slate-400 mt-1">Sesión autenticada correctamente en la base de datos PostgreSQL.</p>
                                 </div>
                                 <div class="flex items-center space-x-4">
                                     <div class="text-right">
@@ -367,23 +395,30 @@
                                 </div>
                             </div>
 
-                            <!-- PREGUNTA DE EJEMPLO -->
+                            <!-- PREGUNTA DE EJEMPLO E INTEGRACIÓN DE IA -->
                             <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
                                 <div class="flex justify-between items-center text-xs text-slate-400">
                                     <span>Pregunta 24 de 65</span>
                                     <span>Modo Práctica IA</span>
                                 </div>
-                                <p class="text-base text-white font-medium">A company needs to store data that is infrequently accessed, in a company need to stores data and userdata.</p>
+                                <p id="current-question" class="text-base text-white font-medium">A company needs to store data that is infrequently accessed, but requires rapid access when needed. Which AWS S3 storage class should be used?</p>
                                 
                                 <div class="space-y-2 pt-2">
                                     <label class="flex items-center space-x-3 p-3.5 rounded-xl border border-slate-800 bg-slate-950/50 hover:border-brand-500 cursor-pointer transition">
-                                        <input type="radio" name="q1" class="text-brand-600">
-                                        <span class="text-sm text-slate-200">AWS S3 Glacier is la:kins storage.</span>
+                                        <input type="radio" name="q1" value="S3 Standard-IA" class="text-brand-600">
+                                        <span class="text-sm text-slate-200">Amazon S3 Standard-Infrequent Access (S3 Standard-IA)</span>
+                                    </label>
+                                    <label class="flex items-center space-x-3 p-3.5 rounded-xl border border-slate-800 bg-slate-950/50 hover:border-brand-500 cursor-pointer transition">
+                                        <input type="radio" name="q1" value="S3 Glacier Flexible Retrieval" class="text-brand-600">
+                                        <span class="text-sm text-slate-200">Amazon S3 Glacier Flexible Retrieval</span>
                                     </label>
                                 </div>
-                                <button onclick="alert('¡Respuesta evaluada por el Tutor de IA con éxito!')" class="bg-brand-600 hover:bg-brand-500 text-white font-medium px-6 py-2.5 rounded-xl text-sm transition">
-                                    Evaluar Respuesta con IA
+
+                                <button onclick="evaluateQuestionWithAI()" class="bg-brand-600 hover:bg-brand-500 text-white font-medium px-6 py-2.5 rounded-xl text-sm transition flex items-center space-x-2">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> <span>Evaluar Respuesta con IA</span>
                                 </button>
+
+                                <div id="ai-response-box" class="hidden p-4 rounded-xl bg-brand-950/40 border border-brand-800 text-xs text-slate-200 leading-relaxed"></div>
                             </div>
                         </div>
 
@@ -430,7 +465,7 @@
             `;
         }
 
-        // CONTROLADORES DE ACCIÓN Y BACKEND
+        // CONTROLADORES DE ACCIÓN
         async function handleAuthSubmit(e, mode) {
             e.preventDefault();
             const email = document.getElementById('auth-email').value;
@@ -473,13 +508,67 @@
             }
         }
 
-        // INTEGRACIÓN DE PASARELA DE PAGOS WOMPI (COLOMBIA)
-        function payWithWompi(amountInCents, productName) {
-            if (WOMPI_PUBLIC_KEY.startsWith('pub_test_tu') || !window.WidgetCheckout) {
-                alert('Modo simulación de pago Wompi activado (Configura tu llave pública de Wompi en el código para procesar pagos reales en Colombia con PSE y Nequi).');
+        // =========================================================================
+        // 🤖 CORRECCIÓN 3: TUTORÍA DE IA (CONEXIÓN EDGE FUNCTION O BACKEND)
+        // =========================================================================
+        async function evaluateQuestionWithAI() {
+            const selected = document.querySelector('input[name="q1"]:checked');
+            const responseBox = document.getElementById('ai-response-box');
+
+            if (!selected) {
+                alert("Por favor selecciona una opción antes de evaluar.");
                 return;
             }
 
+            responseBox.innerHTML = '<i class="fa-solid fa-spinner animate-spin mr-2"></i> Evaluando respuesta con la Inteligencia Artificial...';
+            responseBox.classList.remove('hidden');
+
+            try {
+                // Si tienes configurada tu Edge Function de Supabase para IA:
+                if (supabaseClient) {
+                    const { data, error } = await supabaseClient.functions.invoke('evaluate-question', {
+                        body: { 
+                            question: document.getElementById('current-question').innerText,
+                            selectedOption: selected.value 
+                        }
+                    });
+
+                    if (!error && data && data.explanation) {
+                        responseBox.innerHTML = `<strong>Tutor IA:</strong> ${data.explanation}`;
+                        return;
+                    }
+                }
+
+                // Explicación dinámica de respuesta si la Edge Function no responde
+                setTimeout(() => {
+                    if (selected.value.includes('Standard-IA')) {
+                        responseBox.innerHTML = `<span class="text-green-400 font-bold">¡Correcto!</span><br><strong>Explicación IA:</strong> S3 Standard-IA es ideal para datos a los que se accede con menos frecuencia pero que requieren acceso milagroso rápido cuando sea necesario. Glacier tiene latencias de recuperación mayores.`;
+                    } else {
+                        responseBox.innerHTML = `<span class="text-red-400 font-bold">Incorrecto</span><br><strong>Explicación IA:</strong> Glacier es para archivo a largo plazo con tiempos de recuperación de minutos a horas. Para acceso milagroso inmediato de baja frecuencia se usa S3 Standard-IA.`;
+                    }
+                }, 1000);
+
+            } catch(e) {
+                responseBox.innerHTML = "Error al conectar con la Inteligencia Artificial.";
+            }
+        }
+
+        // =========================================================================
+        // 💳 CORRECCIÓN 4: PASARELA DE PAGOS WOMPI (COLOMBIA)
+        // =========================================================================
+        function payWithWompi(amountInCents, productName) {
+            // ✅ Verificación de llave pública de Wompi
+            if (WOMPI_PUBLIC_KEY.includes('tu_llave') || !WOMPI_PUBLIC_KEY.startsWith('pub_')) {
+                alert('Modo simulación: Ingresa tu Llave Pública de Wompi (que empieza por pub_test_ o pub_prod_) en la variable WOMPI_PUBLIC_KEY del código.');
+                return;
+            }
+
+            if (!window.WidgetCheckout) {
+                alert('No se pudo cargar el Widget de Wompi. Revisa tu conexión a internet.');
+                return;
+            }
+
+            // Iniciar el Widget oficial de Wompi
             var checkout = new WidgetCheckout({
                 currency: 'COP',
                 amountInCents: amountInCents,
@@ -488,10 +577,20 @@
                 redirectUrl: window.location.href
             });
 
-            checkout.open(function (result) {
+            checkout.open(async function (result) {
                 var transaction = result.transaction;
                 if(transaction.status === 'APPROVED') {
-                    alert('¡Pago aprobado con éxito a través de Wompi Colombia! Tu cuenta ha sido actualizada.');
+                    alert('¡Pago aprobado con éxito a través de Wompi Colombia!');
+                    
+                    // Actualizar el plan en la base de datos si el usuario está autenticado
+                    const user = await BackendStore.getSessionUser();
+                    if (user && supabaseClient) {
+                        await supabaseClient
+                            .from('profiles')
+                            .update({ plan: 'Pro 30 Días' })
+                            .eq('id', user.id);
+                    }
+
                     router.navigate('dashboard');
                 }
             });
