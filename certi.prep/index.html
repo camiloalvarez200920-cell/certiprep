@@ -407,7 +407,7 @@
                             <div class="text-center mb-5"><span class="px-4 py-1.5 rounded-full text-xs font-bold ${isPro ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-dark-900 text-slate-300 border border-dark-700'}">Membresía: ${user.plan}</span></div>
                             
                             <!-- Botón de Pago Wompi (Solo si es Gratis) -->
-                            ${!isPro ? `<button onclick="payWithWompi(500000, 'Membresía PRO CertiPrep')" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-medium py-3 rounded-xl shadow-lg transition flex justify-center items-center gap-2"><i class="fa-solid fa-bolt"></i> Desbloquear Pro ($50k)</button>` : ''}
+                            ${!isPro ? `<button onclick="payWithWompi(5000000, 'Membresía PRO CertiPrep')" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-medium py-3 rounded-xl shadow-lg transition flex justify-center items-center gap-2"><i class="fa-solid fa-bolt"></i> Desbloquear Pro ($50k)</button>` : ''}
                             
                             <!-- Menú de Pestañas -->
                             <div class="mt-6 border-t border-dark-700 pt-5 space-y-2">
@@ -875,7 +875,7 @@ async function handleAuth(e, mode) {
  */
 async function payWithWompi(amountInCents, productName) {
     // Tu llave pública real de producción de Wompi
-    const WOMPI_PUBLIC_KEY = 'pub_prod_Cku7YXMh34ncyvyPeMv5zpiCsfgMAV8R'; 
+    const WOMPI_PUBLIC_KEY = 'pub_test_yeASV07aXBT4X1uM1LJUXqe1YfXDSKum'; 
     const referenceTx = 'CERTIPREP-TX-' + Date.now();
     
     // Verificar si el script de Wompi cargó correctamente
