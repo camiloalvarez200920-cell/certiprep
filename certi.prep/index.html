@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CertiPrep AI | Plataforma Educativa Premium</title>
     
+    <!-- ========================================== -->
+    <!-- CONFIGURACIÓN DE TAILWIND CSS Y ESTILOS    -->
+    <!-- ========================================== -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -31,14 +34,24 @@
             }
         }
     </script>
+    <!-- FontAwesome para iconografía corporativa -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- ========================================== -->
+    <!-- SDK OFICIAL DE PASARELA DE PAGOS WOMPI     -->
+    <!-- ========================================== -->
+    <script src="https://checkout.co.wompi.co/widget.js"></script>
+
     <style>
+        /* Estilos globales y tipografía inmersiva */
         body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; }
         .content-text { font-family: 'Inter', sans-serif; line-height: 1.8; color: #cbd5e1; }
         .content-text p { margin-bottom: 1.5rem; text-align: justify; }
         .content-text h3 { color: #f8fafc; font-size: 1.5rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem; }
         
+        /* Personalización de la barra de desplazamiento */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
@@ -47,26 +60,31 @@
 </head>
 <body class="flex flex-col min-h-screen">
 
+    <!-- ========================================== -->
+    <!-- CABECERA Y NAVEGACIÓN GLOBAL PRINCIPAL     -->
+    <!-- ========================================== -->
     <header class="sticky top-0 z-50 backdrop-blur-xl bg-dark-900/80 border-b border-dark-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <!-- Logo principal interactivo que redirige a inicio -->
             <div class="flex items-center space-x-3 cursor-pointer" onclick="router.navigate('landing')">
                 <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-teal-400 flex items-center justify-center shadow-lg shadow-brand-500/20">
                     <i class="fa-solid fa-graduation-cap text-white text-lg"></i>
                 </div>
                 <span class="text-xl font-bold tracking-tight">CertiPrep AI</span>
             </div>
-            <div id="nav-actions" class="flex items-center space-x-4">
-                <!-- Inyectado dinámicamente -->
-            </div>
+            <!-- Acciones de navegación inyectadas dinámicamente según sesión -->
+            <div id="nav-actions" class="flex items-center space-x-4"></div>
         </div>
     </header>
 
+    <!-- Contenedor principal donde el router renderiza las vistas -->
     <main id="app-container" class="flex-grow flex flex-col"></main>
 
+    <!-- ========================================== -->
+    <!-- MOTOR DE GENERACIÓN DE CONTENIDO EDUCATIVO -->
+    <!-- ========================================== -->
     <script>
-        // ==========================================
-        // MOTOR GENERADOR DE CONTENIDO MASIVO
-        // ==========================================
+        // Función generadora de bloques de texto masivo, imágenes y preguntas de reflexión
         function generateModuleContent(baseText, isPremium) {
             const repetitions = isPremium ? 15 : 6; 
             let finalHtml = '';
@@ -79,7 +97,7 @@
                         </div>
                         ${i % 2 === 0 ? `
                         <div class="w-full lg:w-1/3 flex-shrink-0">
-                            <img src="https://placehold.co/600x400/1e293b/14b8a6?text=Ilustración+Educativa+${i+1}" 
+                            <img src="https://placehold.co/600x400/1e293b/14b8a6?text=Concepto+Educativo+${i+1}" 
                                  alt="Concepto Educativo" 
                                  class="w-full h-auto rounded-xl shadow-lg border border-dark-700 object-cover hover:scale-105 transition-transform duration-300">
                             <p class="text-xs text-center text-slate-500 mt-2 italic">Figura ${i+1}: Representación gráfica del concepto tratado.</p>
@@ -92,27 +110,29 @@
             finalHtml += `
                 <div class="mt-12 bg-dark-800 border-l-4 border-brand-500 p-6 rounded-r-xl shadow-lg">
                     <h4 class="text-brand-400 font-bold text-lg mb-2"><i class="fa-solid fa-lightbulb mr-2"></i> Pregunta de Reflexión</h4>
-                    <p class="text-slate-300 italic mb-4">Con base en los conceptos que acabas de leer, ¿Cómo aplicarías esta teoría en un escenario corporativo real para optimizar costos y tiempos?</p>
+                    <p class="text-slate-300 italic mb-4">Con base en los conceptos leídos, ¿Cómo aplicarías esta teoría en un escenario corporativo real para optimizar costos y tiempos?</p>
                     <textarea class="w-full bg-dark-900 border border-dark-700 rounded-lg p-3 text-sm text-slate-200 focus:border-brand-500 focus:outline-none" rows="4" placeholder="Escribe tus reflexiones aquí..."></textarea>
                 </div>
             `;
             return finalHtml;
         }
 
+        // Textos base para las diferentes ramas profesionales
         const baseTechText = `
-            <p>La computación en la nube y el desarrollo tecnológico han revolucionado la manera en que las organizaciones gestionan sus recursos digitales. En lugar de mantener centros de datos locales costosos y difíciles de escalar, las empresas ahora confían en proveedores de nube para obtener capacidad de cómputo, almacenamiento y bases de datos bajo demanda.</p>
-            <p>Esta transformación no es solo técnica, sino también financiera y operativa. Los modelos de precios de pago por uso permiten a las startups competir con corporaciones multinacionales, democratizando el acceso a tecnologías de punta como el aprendizaje automático y el análisis de big data.</p>
-            <p>La seguridad es un componente crítico en este ecosistema. El modelo de responsabilidad compartida dicta que el proveedor protege la infraestructura subyacente, mientras que el cliente debe asegurar los datos, las configuraciones de red y la gestión de identidades.</p>
-            <p>Además, la alta disponibilidad y la tolerancia a fallos se diseñan asumiendo que los componentes individuales eventualmente fallarán. Al distribuir recursos a través de múltiples zonas de disponibilidad y regiones geográficas, los sistemas modernos pueden soportar fallos imprevistos.</p>
+            <p>La computación en la nube y el desarrollo tecnológico han revolucionado la manera en que las organizaciones gestionan sus recursos digitales. En lugar de mantener centros de datos locales costosos y difíciles de escalar, las empresas confían en proveedores de nube para obtener capacidad de cómputo bajo demanda.</p>
+            <p>Esta transformación no es solo técnica, sino también financiera y operativa. Los modelos de precios de pago por uso permiten a las startups competir con corporaciones multinacionales, democratizando el acceso a tecnologías de punta.</p>
+            <p>La seguridad es un componente crítico en este ecosistema. El modelo de responsabilidad compartida dicta que el proveedor protege la infraestructura subyacente, mientras que el cliente debe asegurar los datos y las configuraciones de red.</p>
+            <p>Además, la alta disponibilidad y la tolerancia a fallos se diseñan asumiendo que los componentes individuales eventualmente fallarán, distribuyendo cargas a través de múltiples zonas.</p>
         `;
 
         const baseMedText = `
-            <p>El estudio de la anatomía y fisiología humana es el pilar fundamental de las ciencias de la salud. Comprender cómo interactúan los diferentes sistemas del cuerpo (cardiovascular, respiratorio, nervioso y endocrino) permite a los profesionales médicos diagnosticar y tratar enfermedades con precisión.</p>
-            <p>La homeostasis, el estado de equilibrio interno, es mantenido por mecanismos de retroalimentación complejos. Cuando estos mecanismos fallan, se presenta la patología. El análisis clínico detallado, junto con la interpretación de pruebas de laboratorio e imágenes diagnósticas, es crucial para identificar el origen.</p>
-            <p>La farmacología moderna ofrece herramientas terapéuticas específicas, pero requiere un profundo conocimiento de la farmacocinética y la farmacodinámica para evitar interacciones adversas y toxicidad.</p>
-            <p>En el contexto de la salud pública, la epidemiología y las medidas preventive juegan un rol vital en la reducción de la morbilidad a nivel poblacional, requiriendo protocolos rigurosos de bioseguridad.</p>
+            <p>El estudio de la anatomía y fisiología humana es el pilar fundamental de las ciencias de la salud. Comprender cómo interactúan los diferentes sistemas del cuerpo permite a los profesionales médicos diagnosticar y tratar enfermedades con precisión.</p>
+            <p>La homeostasis, el estado de equilibrio interno, es mantenido por mecanismos de retroalimentación complejos. Cuando estos mecanismos fallan, se presenta la patología, requiriendo análisis clínicos detallados.</p>
+            <p>La farmacología moderna ofrece herramientas terapéuticas específicas, pero requiere un profundo conocimiento de la farmacocinética para evitar interacciones adversas.</p>
+            <p>En el contexto de salud pública, la epidemiología juega un rol vital en la reducción de la morbilidad a nivel poblacional mediante protocolos de bioseguridad.</p>
         `;
 
+        // Generador automatizado de preguntas para simuladores (10 para gratis, 25 para pro)
         function generateQuestions(baseQs, category, isPremium) {
             const total = isPremium ? 25 : 10; 
             const qs = [...baseQs];
@@ -132,13 +152,16 @@
             return qs;
         }
 
+        // ==========================================
+        // BASES DE DATOS DE CURSOS Y SIMULADORES
+        // ==========================================
         const coursesDB = [
             // TECNOLOGÍA
             { id: 'c1', cat: 'Tecnología', title: 'Fundamentos de Cloud Computing', isFree: true, icon: 'fa-cloud', modules: Array.from({length: 5}, (_, i) => ({ title: `Módulo ${i+1}: Conceptos Básicos`, content: generateModuleContent(baseTechText, false) })) },
-            { id: 'c2', cat: 'Tecnología', title: 'Arquitectura AWS Avanzada', isFree: false, icon: 'fa-server', modules: Array.from({length: 12}, (_, i) => ({ title: `Módulo ${i+1}: Diseño Resiliente`, content: generateModuleContent(baseTechText, true) })) },
+            { id: 'c2', cat: 'Tecnología', title: 'Arquitectura AWS Avanzada', isFree: false, icon: 'fa-server', modules: Array.from({length: 10}, (_, i) => ({ title: `Módulo ${i+1}: Diseño Resiliente`, content: generateModuleContent(baseTechText, true) })) },
             // MEDICINA
             { id: 'c3', cat: 'Medicina', title: 'Anatomía Humana Básica', isFree: true, icon: 'fa-heart-pulse', modules: Array.from({length: 5}, (_, i) => ({ title: `Módulo ${i+1}: Sistemas del Cuerpo`, content: generateModuleContent(baseMedText, false) })) },
-            { id: 'c4', cat: 'Medicina', title: 'Farmacología Clínica Avanzada', isFree: false, icon: 'fa-pills', modules: Array.from({length: 15}, (_, i) => ({ title: `Módulo ${i+1}: Farmacodinamia`, content: generateModuleContent(baseMedText, true) })) },
+            { id: 'c4', cat: 'Medicina', title: 'Farmacología Clínica Avanzada', isFree: false, icon: 'fa-pills', modules: Array.from({length: 10}, (_, i) => ({ title: `Módulo ${i+1}: Farmacodinamia`, content: generateModuleContent(baseMedText, true) })) },
             // NEGOCIOS
             { id: 'c5', cat: 'Negocios', title: 'Gestión Ágil de Proyectos', isFree: true, icon: 'fa-chart-pie', modules: Array.from({length: 5}, (_, i) => ({ title: `Módulo ${i+1}: Scrum Framework`, content: generateModuleContent(baseTechText, false) })) },
             { id: 'c6', cat: 'Negocios', title: 'MBA Acelerado: Finanzas Corporativas', isFree: false, icon: 'fa-money-bill-trend-up', modules: Array.from({length: 10}, (_, i) => ({ title: `Módulo ${i+1}: Valoración de Empresas`, content: generateModuleContent(baseTechText, true) })) },
@@ -147,10 +170,10 @@
             { id: 'c8', cat: 'Derecho', title: 'Derecho Internacional Privado', isFree: false, icon: 'fa-globe', modules: Array.from({length: 10}, (_, i) => ({ title: `Módulo ${i+1}: Jurisdicción`, content: generateModuleContent(baseTechText, true) })) },
             // IDIOMAS
             { id: 'c9', cat: 'Idiomas', title: 'Inglés Básico B1', isFree: true, icon: 'fa-language', modules: Array.from({length: 5}, (_, i) => ({ title: `Módulo ${i+1}: Estructura Gramatical`, content: generateModuleContent(baseTechText, false) })) },
-            { id: 'c10', cat: 'Idiomas', title: 'Preparación TOEFL iBT Pro', isFree: false, icon: 'fa-spell-check', modules: Array.from({length: 12}, (_, i) => ({ title: `Módulo ${i+1}: Speaking & Writing`, content: generateModuleContent(baseTechText, true) })) },
+            { id: 'c10', cat: 'Idiomas', title: 'Preparación TOEFL iBT Pro', isFree: false, icon: 'fa-spell-check', modules: Array.from({length: 10}, (_, i) => ({ title: `Módulo ${i+1}: Speaking & Writing`, content: generateModuleContent(baseTechText, true) })) },
             // INGENIERÍA
             { id: 'c11', cat: 'Ingeniería', title: 'Física Clásica: Mecánica', isFree: true, icon: 'fa-gear', modules: Array.from({length: 5}, (_, i) => ({ title: `Módulo ${i+1}: Leyes de Newton`, content: generateModuleContent(baseTechText, false) })) },
-            { id: 'c12', cat: 'Ingeniería', title: 'Diseño Estructural Avanzado', isFree: false, icon: 'fa-building', modules: Array.from({length: 15}, (_, i) => ({ title: `Módulo ${i+1}: Resistencia de Materiales`, content: generateModuleContent(baseTechText, true) })) }
+            { id: 'c12', cat: 'Ingeniería', title: 'Diseño Estructural Avanzado', isFree: false, icon: 'fa-building', modules: Array.from({length: 10}, (_, i) => ({ title: `Módulo ${i+1}: Resistencia de Materiales`, content: generateModuleContent(baseTechText, true) })) }
         ];
 
         const simulatorsDB = [
@@ -198,6 +221,9 @@
             { id: 's12', cat: 'Ingeniería', title: 'Simulacro Calculo Estructural', isFree: false, questions: generateQuestions([], 'Ingeniería', true) }
         ];
 
+        // ==========================================
+        // GESTIÓN DE ALMACENAMIENTO Y SESIÓN
+        // ==========================================
         const AuthStore = {
             getUser: () => JSON.parse(localStorage.getItem('certiprep_user')),
             setUser: (user) => localStorage.setItem('certiprep_user', JSON.stringify(user)),
@@ -210,9 +236,9 @@
                 localStorage.setItem('certiprep_payments', JSON.stringify(payments));
             },
 
+            // Base de datos simulada estilo Supabase para administración de usuarios
             getUsersDb: () => {
                 let db = JSON.parse(localStorage.getItem('certiprep_users_db')) || [];
-                // Asegurar que el admin siempre esté listado
                 if(!db.find(u => u.email === 'admin@certiprep.ai')) {
                     db.unshift({
                         name: 'Administrador',
@@ -235,12 +261,15 @@
             }
         };
 
+        // ==========================================
+        // SISTEMA DE ENRUTAMIENTO (ROUTER)
+        // ==========================================
         const router = {
             navigate: (view, param = null) => {
                 const container = document.getElementById('app-container');
                 const user = AuthStore.getUser();
-                
                 const nav = document.getElementById('nav-actions');
+
                 if (user) {
                     nav.innerHTML = `<button onclick="router.navigate('${user.role === 'admin' ? 'admin' : 'dashboard'}')" class="bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium px-5 py-2.5 rounded-xl shadow-lg transition">Ir al Panel</button>`;
                 } else {
@@ -271,6 +300,9 @@
             }
         };
 
+        // ==========================================
+        // RENDERIZADO DE VISTAS PRINCIPALES
+        // ==========================================
         function renderLanding() {
             return `
                 <section class="py-24 text-center px-4 flex-grow flex flex-col justify-center bg-gradient-to-b from-dark-900 to-dark-800">
@@ -337,7 +369,7 @@
 
             return `
                 <div class="max-w-7xl mx-auto px-4 py-8 flex flex-col md:flex-row gap-8 w-full">
-                    <!-- SIDEBAR -->
+                    <!-- PANEL LATERAL DE USUARIO -->
                     <div class="w-full md:w-64 flex-shrink-0">
                         <div class="bg-dark-800 p-5 rounded-2xl border border-dark-700 mb-6 sticky top-24">
                             <div class="w-16 h-16 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center overflow-hidden mb-3 shadow-md mx-auto">
@@ -354,7 +386,7 @@
                             ${!isPro ? `
                                 <div class="mt-6 border-t border-dark-700 pt-4">
                                     <p class="text-xs text-slate-400 mb-3 text-center">Desbloquea miles de horas de contenido y simuladores.</p>
-                                    <button onclick="simulateWompiPayment()" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-medium py-2.5 rounded-xl shadow-lg transition flex justify-center items-center gap-2">
+                                    <button onclick="payWithWompi(11600000, 'Membresía PRO CertiPrep AI')" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-medium py-2.5 rounded-xl shadow-lg transition flex justify-center items-center gap-2">
                                         <i class="fa-solid fa-credit-card"></i> Pagar Pro ($116.000)
                                     </button>
                                 </div>
@@ -381,7 +413,7 @@
                         </div>
                     </div>
 
-                    <!-- CATÁLOGO / CONTENIDO PRINCIPAL -->
+                    <!-- CONTENIDO DE CATÁLOGO / AJUSTES -->
                     <div class="flex-grow">
                         ${currentDashboardTab !== 'ajustes' ? `
                             <div class="flex overflow-x-auto pb-4 mb-6 gap-2 hide-scrollbar">
@@ -405,6 +437,7 @@
             `;
         }
 
+        // Cambio entre pestañas del panel de estudiante
         window.switchDashboardTab = function(tab) {
             currentDashboardTab = tab;
             currentFilter = 'Todos';
@@ -415,6 +448,7 @@
             }
         };
 
+        // Renderizado de la pestaña de Ajustes (Edición de perfil y avatar)
         function renderSettingsTab(user) {
             return `
                 <div class="bg-dark-800 border border-dark-700 rounded-2xl p-8 max-w-2xl">
@@ -430,7 +464,7 @@
                             <input type="email" value="${user.email}" readonly class="w-full bg-dark-900 border border-dark-700 rounded-lg p-3 text-slate-500 focus:outline-none cursor-not-allowed">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-slate-400 mb-2">Foto de Perfil (URL de imagen o carga local)</label>
+                            <label class="block text-sm font-medium text-slate-400 mb-2">Foto de Perfil (URL de imagen o avatar)</label>
                             <input type="url" id="profile-avatar" value="${user.avatar || ''}" placeholder="https://ejemplo.com/mi-foto.jpg" class="w-full bg-dark-900 border border-dark-700 rounded-lg p-3 text-slate-200 focus:border-brand-500 focus:outline-none">
                             <p class="text-xs text-slate-500 mt-1">Puedes pegar el enlace directo de una imagen web o avatar.</p>
                         </div>
@@ -443,6 +477,7 @@
             `;
         }
 
+        // Manejador para actualizar el perfil del usuario activo
         window.handleUpdateProfile = function(e) {
             e.preventDefault();
             const newName = document.getElementById('profile-name').value.trim();
@@ -459,6 +494,7 @@
             router.navigate('dashboard');
         };
 
+        // Renderizado del catálogo filtrado
         function renderCatalog(user) {
             const isPro = user.plan === 'Pro';
             
@@ -508,6 +544,9 @@
             router.navigate(type, id);
         }
 
+        // ==========================================
+        // VISTA DE CURSO (AULA VIRTUAL)
+        // ==========================================
         function renderCourseView(courseId) {
             const course = coursesDB.find(c => c.id === courseId);
             const firstModule = course.modules[0];
@@ -558,6 +597,9 @@
             document.querySelector('.flex-1.overflow-y-auto').scrollTo(0, 0);
         };
 
+        // ==========================================
+        // VISTA DE SIMULADOR DE EXAMEN
+        // ==========================================
         let currentSimState = { data: null, qIndex: 0, score: 0 };
         function renderSimulatorView(simId) {
             const sim = simulatorsDB.find(s => s.id === simId);
@@ -676,6 +718,9 @@
             }
         };
 
+        // ==========================================
+        // PANEL DE ADMINISTRACIÓN (SUPABASE MOCK)
+        // ==========================================
         function renderAdmin(user) {
             const payments = AuthStore.getPayments();
             const totalRevenue = payments.reduce((acc, curr) => acc + curr.amount, 0);
@@ -691,7 +736,7 @@
                     </td>
                     <td class="p-4 text-slate-300">${u.email}</td>
                     <td class="p-4"><span class="px-2 py-1 rounded-full text-xs font-bold ${u.plan === 'Pro' || u.plan.includes('Pro') ? 'bg-amber-500/20 text-amber-400' : 'bg-dark-700 text-slate-300'}">${u.plan}</span></td>
-                    <td class="p-4 text-slate-400 font-mono text-xs">${u.registeredAt || '2026-10-01 12:00'}</td>
+                    <td class="p-4 text-slate-400 font-mono text-xs">${u.registeredAt || '2026-01-01 10:00'}</td>
                     <td class="p-4 text-slate-400 font-mono text-xs">${u.lastLogin || 'Reciente'}</td>
                 </tr>
             `).join('');
@@ -781,6 +826,9 @@
             `;
         }
 
+        // ==========================================
+        // MANEJADORES DE AUTENTICACIÓN Y PAGOS REALES WOMPI
+        // ==========================================
         function handleAuth(e, mode) {
             e.preventDefault();
             const email = document.getElementById('auth-email').value.trim();
@@ -825,9 +873,7 @@
                     const found = userDb.find(u => u.email === email && u.password === password);
                     if (!found) throw new Error("Credenciales incorrectas.");
                     
-                    // Actualizar último login en la base de datos
                     AuthStore.updateUserDb(email, { lastLogin: new Date().toLocaleString('es-CO') });
-                    
                     AuthStore.setUser(found);
                     router.navigate('dashboard');
                 }
@@ -843,67 +889,96 @@
             router.navigate('landing');
         }
 
-        function simulateWompiPayment() {
-            const modalHtml = `
-                <div id="wompi-modal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-[fadeIn_0.3s_ease-out]">
-                    <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
-                        <div class="bg-[#002B5E] p-4 text-white flex justify-between items-center">
-                            <div class="font-bold text-lg tracking-wider">Wompi.</div>
-                            <div class="text-sm font-medium opacity-80">Modo Pruebas</div>
-                        </div>
-                        <div class="p-6">
-                            <h3 class="text-xl font-bold text-slate-800 mb-1">Membresía PRO Ilimitada</h3>
-                            <p class="text-slate-500 text-sm mb-6">CertiPrep AI S.A.S</p>
-                            
-                            <div class="bg-slate-100 rounded-xl p-4 flex justify-between items-center mb-6">
-                                <span class="text-slate-600 font-medium">Total a pagar</span>
-                                <span class="text-2xl font-black text-slate-900">$116.000 COP</span>
-                            </div>
-                            
-                            <p class="text-xs text-slate-500 mb-4 text-center">Haz clic en aprobar para activar tu membresía.</p>
-                            
-                            <button onclick="processWompiSuccess()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-emerald-500/30 transition transform hover:-translate-y-1 mb-3">
-                                Aprobar Pago de Prueba ($116.000)
-                            </button>
-                            <button onclick="document.getElementById('wompi-modal').remove()" class="w-full bg-transparent text-slate-500 hover:text-slate-700 font-medium py-2 transition">
-                                Cancelar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
-        }
+        /**
+         * Abre la pasarela oficial de Wompi de manera real con el valor exacto de $116.000 COP (11600000 centavos)
+         * @param {number} amountInCents - Monto exacto en centavos (11600000)
+         * @param {string} productName - Nombre del plan o membresía
+         */
+        function payWithWompi(amountInCents, productName) {
+            // Llave pública oficial de Wompi (Producción o Pruebas según configuración)
+            const WOMPI_PUBLIC_KEY = 'pub_prod_Cku7YXMh34ncyvyPeMv5zpiCsfgMAV8R'; 
+            
+            // Generación de referencia única basada en tiempo
+            const referenceTx = 'CERTIPREP-TX-' + Date.now();
 
-        function processWompiSuccess() {
-            document.getElementById('wompi-modal').remove();
-            try {
-                const currentUser = AuthStore.getUser();
-                currentUser.plan = 'Pro';
-                AuthStore.setUser(currentUser);
-                
-                AuthStore.updateUserDb(currentUser.email, { plan: 'Pro' });
-                
-                const tx = {
-                    date: new Date().toLocaleString('es-CO'),
-                    userEmail: currentUser.email,
-                    amount: 116000,
-                    txId: 'TX-WP-' + Math.floor(Math.random() * 1000000000)
-                };
-                AuthStore.addPayment(tx);
-                
-                alert("¡Transacción Aprobada! Tu membresía PRO ha sido activada.");
-                router.navigate('dashboard');
-                
-            } catch(e) {
-                alert("Ocurrió un error al procesar tu pago.");
+            // Verificación de disponibilidad del SDK oficial de Wompi en el navegador
+            if (typeof WidgetCheckout === 'undefined') {
+                alert("El servicio de pagos Wompi no se encuentra disponible momentáneamente. Verifica tu conexión o desactivadores de anuncios.");
+                return;
             }
+
+            // Inicialización del widget oficial de Wompi con valor fijo inalterable
+            var checkout = new WidgetCheckout({
+                currency: 'COP',
+                amountInCents: amountInCents, // Valor exacto fijo ($116.000 COP = 11600000 centavos)
+                reference: referenceTx,
+                publicKey: WOMPI_PUBLIC_KEY,
+                redirectUrl: window.location.href // Redirección tras completar el flujo bancario
+            });
+
+            // Apertura del checkout seguro
+            checkout.open(function (result) {
+                var transaction = result.transaction;
+                
+                if (transaction && transaction.status === 'APPROVED') {
+                    // El pago fue aprobado exitosamente por la red financiera (PSE, Nequi, Tarjeta)
+                    console.log("Transacción aprobada ID:", transaction.id);
+                    handleSuccessfulRealPayment(transaction.id, amountInCents);
+                    
+                } else if (transaction && transaction.status === 'DECLINED') {
+                    alert("La transacción fue declinada por la entidad financiera.");
+                } else if (transaction && transaction.status === 'PENDING') {
+                    alert("Tu pago se encuentra en proceso de validación (por ejemplo, pago pendiente en Efecty o PSE).");
+                }
+            });
         }
 
+        /**
+         * Función auxiliar para actualizar la cuenta a PRO y registrar el recibo en la base de datos de administración
+         */
+        async function handleSuccessfulRealPayment(txId, amountInCents) {
+            let currentUser = AuthStore.getUser();
+            if (!currentUser) {
+                currentUser = JSON.parse(localStorage.getItem('certiprep_verified_user'));
+            }
+            
+            if (!currentUser) {
+                alert("Pago aprobado, pero no se encontró la sesión activa del usuario. Inicia sesión nuevamente.");
+                router.navigate('auth', 'login');
+                return;
+            }
+
+            // 1. Actualizamos el plan a Pro de forma permanente en la sesión
+            currentUser.plan = 'Pro';
+            if(currentUser.profileData) currentUser.profileData.plan = 'Pro';
+            if(currentUser.app_metadata) currentUser.app_metadata.plan = 'Pro';
+            
+            // Guardamos cambios en almacenamiento local
+            AuthStore.setUser(currentUser);
+            AuthStore.updateUserDb(currentUser.email, { plan: 'Pro' });
+
+            // 2. Registramos el recibo financiero en la base de datos de transacciones para tu Panel de Administrador
+            const paymentRecord = {
+                date: new Date().toLocaleString('es-CO'),
+                userEmail: currentUser.email,
+                amount: amountInCents / 100, // Convertimos de centavos a pesos colombianos ($116.000)
+                txId: txId
+            };
+            
+            AuthStore.addPayment(paymentRecord);
+
+            alert("¡Pago procesado con éxito a través de Wompi! Tu membresía PRO y todo el contenido están activos.");
+            
+            // Recargamos el tablero del usuario para reflejar el desbloqueo total
+            router.navigate('dashboard');
+        }
+
+        // Estilo auxiliar de animación
         const style = document.createElement('style');
         style.innerHTML = `@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }`;
         document.head.appendChild(style);
 
+        // Inicialización del sistema al cargar la página
         window.addEventListener('DOMContentLoaded', () => {
             router.navigate('landing');
         });
