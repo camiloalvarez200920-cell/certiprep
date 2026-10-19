@@ -14,7 +14,7 @@
     <!-- Supabase para la base de datos y autenticación -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Wompi Oficial para pasarela de pagos en Colombia -->
-    <script src="https://checkout.co.wompi.co/widget.js"></script>
+    <script src="https://checkout.wompi.co/widget.js"></script>
 
     <!-- Configuración extendida de Tailwind -->
     <script>
@@ -67,7 +67,7 @@
 <!-- 
 /**************************************************************************************************
  *                                                                                                *
- *           ⬆️⬆️⬆️ FIN DE LA SECCIÓN CSS (HASTA AQUÍ TU ARCHIVO STYLE.CSS) ⬆️⬆️⬆️                 *
+ *           ⬆️⬆️⬆️ FIN DE LA SECCIÓN CSS (HASTA AQUÍ TU ARCHIVO STYLE.CSS) ⬆️⬆️⬆️                *
  *                                                                                                *
  **************************************************************************************************/ 
 -->
@@ -79,7 +79,7 @@
 <!-- 
 /**************************************************************************************************
  *                                                                                                *
- *     ⬇️⬇️⬇️ INICIO DE LA SECCIÓN HTML (ESTE ES EL ESQUELETO DE TU INDEX.HTML) ⬇️⬇️⬇️             *
+ *     ⬇️⬇️⬇️ INICIO DE LA SECCIÓN HTML (ESTE ES EL ESQUELETO DE TU INDEX.HTML) ⬇️⬇️⬇️            *
  *                                                                                                *
  **************************************************************************************************/ 
 -->
@@ -108,7 +108,7 @@
 <!-- 
 /**************************************************************************************************
  *                                                                                                *
- *          ⬆️⬆️⬆️ FIN DE LA SECCIÓN HTML (HASTA AQUÍ TU ARCHIVO INDEX.HTML) ⬆️⬆️⬆️                *
+ *           ⬆️⬆️⬆️ FIN DE LA SECCIÓN HTML (HASTA AQUÍ TU ARCHIVO INDEX.HTML) ⬆️⬆️⬆️                *
  *                                                                                                *
  **************************************************************************************************/ 
 -->
@@ -263,6 +263,8 @@
            5. GESTIÓN DE ESTADO (LOCALSTORAGE Y USUARIOS)
            ==================================================================================== */
         // Objeto que maneja toda la persistencia de datos (Login, Registro, Edición de Perfiles, Historial Admin)
+
+        
         const AuthStore = {
             // Obtener el usuario actual logueado
             getUser: () => JSON.parse(localStorage.getItem('certiprep_user')),
@@ -651,7 +653,7 @@
             const users = AuthStore.getUsersDb();
             const total = payments.reduce((acc, curr) => acc + curr.amount, 0);
             
-            // Generación de la tabla de usuarios dinámicamente
+            // Generación de la tabla de usuarios dinámicamente con botón de eliminar
             const usersRows = users.map(u => `
                 <tr class="border-b border-dark-700 hover:bg-dark-700/50 transition">
                     <td class="p-4 flex items-center gap-3">
@@ -664,6 +666,12 @@
                     <td class="p-4"><span class="px-3 py-1 rounded-full text-xs font-bold ${u.plan?.includes('Pro') ? 'bg-amber-500/20 text-amber-400 border border-amber-800/50' : 'bg-dark-900 text-slate-300 border border-dark-600'}">${u.plan || 'Básico'}</span></td>
                     <td class="p-4 text-xs text-slate-400">${u.registeredAt}</td>
                     <td class="p-4 text-xs text-slate-400">${u.lastLogin}</td>
+                    <td class="p-4 text-center">
+                        <!-- BOTÓN DE ELIMINAR USUARIO -->
+                        <button onclick="deleteUserProfile('${u.email}')" class="bg-red-900/50 text-red-400 hover:bg-red-500 hover:text-white px-3 py-1.5 rounded-lg border border-red-800 transition text-xs font-bold shadow" title="Eliminar Usuario">
+                            <i class="fa-solid fa-trash"></i> Eliminar
+                        </button>
+                    </td>
                 </tr>
             `).join('');
 
@@ -697,7 +705,7 @@
                     <div class="bg-dark-800 rounded-2xl border border-dark-700 overflow-hidden shadow-2xl mt-8">
                         <div class="p-6 border-b border-dark-700 bg-dark-900/50 flex justify-between items-center">
                             <h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="fa-solid fa-database text-brand-400"></i> Tabla 'public.users'</h3>
-                            <button class="text-xs text-brand-400 hover:text-brand-300 font-medium bg-brand-900/30 px-3 py-1.5 rounded-lg border border-brand-800 transition"><i class="fa-solid fa-arrows-rotate mr-1"></i> Refrescar DB</button>
+                            <button onclick="router.navigate('admin')" class="text-xs text-brand-400 hover:text-brand-300 font-medium bg-brand-900/30 px-3 py-1.5 rounded-lg border border-brand-800 transition"><i class="fa-solid fa-arrows-rotate mr-1"></i> Refrescar DB</button>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-sm whitespace-nowrap">
@@ -708,6 +716,7 @@
                                         <th class="p-5">Suscripción</th>
                                         <th class="p-5">Fecha de Registro</th>
                                         <th class="p-5">Último Acceso</th>
+                                        <th class="p-5 text-center">Acciones</th> <!-- NUEVA COLUMNA DE ACCIONES -->
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -721,89 +730,190 @@
         }
 
         /* ====================================================================================
-           8. LÓGICA DE EVENTOS (AUTH Y PASARELA DE PAGO WOMPI)
+           8. LÓGICA DE EVENTOS (AUTH, PASARELA DE PAGO Y ADMINISTRACIÓN)
            ==================================================================================== */
-        // Procesamiento del formulario de Inicio de sesión / Registro
-        function handleAuth(e, mode) {
-            e.preventDefault();
-            const email = document.getElementById('auth-email').value.trim();
-            const password = document.getElementById('auth-password').value;
-            
-            try {
-                if (mode === 'register') {
-                    const name = document.getElementById('auth-name').value.trim();
-                    let db = AuthStore.getUsersDb();
-                    if(db.find(u => u.email === email)) throw new Error("Este correo ya está registrado en el sistema.");
-                    
-                    // Inserción en "Base de Datos"
-                    db.push({ 
-                        name, email, password, plan: 'Básico', 
-                        registeredAt: new Date().toLocaleString('es-CO'), 
-                        lastLogin: new Date().toLocaleString('es-CO'), avatar: '' 
-                    });
-                    localStorage.setItem('certiprep_users_db', JSON.stringify(db));
-                    showNotification("¡Registro exitoso! Por favor inicia sesión ahora.", "success");
-                    setTimeout(() => router.navigate('auth', 'login'), 1500);
-                } else {
-                    // Bypass para Super Administrador
-                    if (email === 'admin@certiprep.ai' && password === 'admin') {
-                        AuthStore.setUser({ email, name: 'Admin', role: 'admin', plan: 'Pro (Admin)' });
-                        return router.navigate('admin');
-                    }
-                    
-                    // Verificación de credenciales de usuario
-                    let db = AuthStore.getUsersDb();
-                    let found = db.find(u => u.email === email && u.password === password);
-                    if (!found) throw new Error("Credenciales inválidas o cuenta inexistente.");
-                    
-                    // Actualizar última fecha de login
-                    found.lastLogin = new Date().toLocaleString('es-CO');
-                    AuthStore.setUser(found);
-                    AuthStore.updateUserDb(email, { lastLogin: found.lastLogin });
-                    router.navigate('dashboard');
-                }
-            } catch(err) {
-                showNotification(err.message, "error");
-            }
-        }
-
+        
         /**
-         * Pasarela de Pagos Oficial Wompi Colombia (Producción)
-         * Se ejecuta al hacer clic en "Desbloquear Pro".
+         * Función para eliminar un perfil de usuario desde el panel de Admin
          */
-        function payWithWompi(amountInCents, productName) {
-            // TU LLAVE DE PRODUCCIÓN REAL DE WOMPI:
-            const WOMPI_PUBLIC_KEY = 'pub_prod_Cku7YXMh34ncyvyPeMv5zpiCsfgMAV8R'; 
-            // Referencia única de transacción
-            const referenceTx = 'CERTIPREP-TX-' + Date.now();
-            
-            // Verificar que el script oficial de Wompi se haya cargado
-            if (typeof WidgetCheckout === 'undefined') {
-                showNotification("Pasarela Wompi no disponible. Verifica tu conexión o bloqueadores de anuncios (AdBlock).", "error");
+        async function deleteUserProfile(email) {
+            // Evitar que el administrador principal se elimine a sí mismo
+            if (email === 'admin@certiprep.ai') {
+                showNotification("No puedes eliminar la cuenta del administrador principal del sistema.", "error");
                 return;
             }
 
-            // Configurar el widget con el monto fijo en centavos (Ej. 11600000 = 116.000 COP)
-            var checkout = new WidgetCheckout({
-                currency: 'COP',
-                amountInCents: amountInCents, // <- El precio es exacto y no se puede alterar en el frontend
-                reference: referenceTx,
-                publicKey: WOMPI_PUBLIC_KEY,
-                redirectUrl: window.location.href // Redirige aquí tras el pago en el banco
-            });
+            const confirmar = confirm('¿Estás seguro de que deseas eliminar permanentemente a este usuario? Esta acción no se puede deshacer.');
+            
+            if (!confirmar) return;
 
-            // Abrir el modal de pago seguro
-            checkout.open(function (result) {
-                var transaction = result.transaction;
-                
-                // Si el pago es aprobado por el banco (Nequi, PSE, Tarjeta)
-                if (transaction && transaction.status === 'APPROVED') {
-                    handleSuccessfulPayment(transaction.id, amountInCents);
-                } else if (transaction && transaction.status === 'DECLINED') {
-                    showNotification("La transacción fue declinada por tu entidad bancaria.", "error");
+            try {
+                // 1. Eliminar de Supabase (Si está conectado)
+                if (supabaseClient) {
+                    // Nota: Cambia 'users' por el nombre real de tu tabla si se llama diferente en Supabase
+                    const { error } = await supabaseClient
+                        .from('users') 
+                        .delete()
+                        .eq('email', email);
+
+                    if (error) throw error;
                 }
-            });
+
+                // 2. Eliminar de la base de datos local (Fallback para que funcione aquí en la prueba)
+                let db = AuthStore.getUsersDb();
+                db = db.filter(u => u.email !== email);
+                localStorage.setItem('certiprep_users_db', JSON.stringify(db));
+
+                // 3. Notificar éxito y recargar la tabla visualmente
+                showNotification('Perfil de usuario eliminado correctamente.', 'success');
+                router.navigate('admin'); // Recargar la vista de administrador
+                
+            } catch (error) {
+                console.error('Error al eliminar usuario:', error);
+                showNotification('Hubo un error al intentar eliminar el usuario: ' + error.message, 'error');
+            }
         }
+
+       /* ====================================================================================
+   8. LÓGICA DE EVENTOS (AUTH, PASARELA DE PAGO Y ADMINISTRACIÓN)
+   ==================================================================================== */
+
+// Procesamiento del formulario de Inicio de sesión / Registro conectado a Supabase y Roles
+async function handleAuth(e, mode) {
+    e.preventDefault();
+    const email = document.getElementById('auth-email').value.trim();
+    const password = document.getElementById('auth-password').value;
+    
+    try {
+        if (mode === 'register') {
+            const name = document.getElementById('auth-name').value.trim();
+            
+            // 1. Guardar en Supabase (Por defecto se registran como 'student')
+            if (supabaseClient) {
+                const { error } = await supabaseClient
+                    .from('users')
+                    .insert([
+                        { 
+                            name: name, 
+                            email: email, 
+                            password: password, 
+                            plan: 'Básico', 
+                            role: 'student', // <-- Rol por defecto
+                            registeredAt: new Date().toLocaleString('es-CO'),
+                            lastLogin: new Date().toLocaleString('es-CO'),
+                            avatar: ''
+                        }
+                    ]);
+                
+                if (error) {
+                    if (error.code === '23505') throw new Error("Este correo ya está registrado en Supabase.");
+                    throw new Error(error.message);
+                }
+            }
+
+            // 2. Respaldo local
+            let db = AuthStore.getUsersDb();
+            if(db.find(u => u.email === email)) throw new Error("Este correo ya está registrado en el sistema.");
+            
+            db.push({ 
+                name, email, password, plan: 'Básico', role: 'student',
+                registeredAt: new Date().toLocaleString('es-CO'), 
+                lastLogin: new Date().toLocaleString('es-CO'), avatar: '' 
+            });
+            localStorage.setItem('certiprep_users_db', JSON.stringify(db));
+
+            showNotification("¡Registro exitoso! Ya puedes iniciar sesión.", "success");
+            setTimeout(() => router.navigate('auth', 'login'), 1500);
+
+        } else {
+            let loggedUser = null;
+
+            // 1. Intentar validar el inicio de sesión consultando la base de datos de Supabase
+            if (supabaseClient) {
+                const { data, error } = await supabaseClient
+                    .from('users')
+                    .select('*')
+                    .eq('email', email)
+                    .eq('password', password)
+                    .single();
+
+                if (data) {
+                    loggedUser = data; // Obtenemos los datos y el rol directamente de Supabase
+                }
+            }
+
+            // 2. Si no está en Supabase, buscar en el respaldo local (Bypass para el admin principal o pruebas)
+            if (!loggedUser) {
+                if (email === 'admin@certiprep.ai' && password === 'admin') {
+                    loggedUser = { email, name: 'Admin Principal', role: 'admin', plan: 'Pro (Admin)' };
+                } else {
+                    let db = AuthStore.getUsersDb();
+                    let found = db.find(u => u.email === email && u.password === password);
+                    if (!found) throw new Error("Credenciales inválidas o cuenta inexistente.");
+                    loggedUser = found;
+                }
+            }
+
+            // Guardar sesión actual
+            AuthStore.setUser(loggedUser);
+
+            // Redirigir según el rol que tenga en la base de datos
+            if (loggedUser.role === 'admin') {
+                router.navigate('admin');
+            } else {
+                router.navigate('dashboard');
+            }
+        }
+    } catch(err) {
+        showNotification(err.message, "error");
+    }
+}
+        /**
+ /**
+ * Pasarela de Pagos Oficial Wompi Colombia (Producción)
+ * Versión con manejo detallado de errores
+ */
+async function payWithWompi(amountInCents, productName) {
+    // Tu llave pública real de producción de Wompi
+    const WOMPI_PUBLIC_KEY = 'pub_prod_Cku7YXMh34ncyvyPeMv5zpiCsfgMAV8R'; 
+    const referenceTx = 'CERTIPREP-TX-' + Date.now();
+    
+    // Verificar si el script de Wompi cargó correctamente
+    if (typeof WidgetCheckout === 'undefined') {
+        showNotification("La librería de Wompi no se ha cargado. Verifica tu conexión o bloqueadores.", "error");
+        return;
+    }
+
+    try {
+        console.log("Inicializando Wompi con:", { amountInCents, referenceTx, WOMPI_PUBLIC_KEY });
+
+        // Inicializar el widget oficial de Wompi Colombia
+        var checkout = new WidgetCheckout({
+            currency: 'COP',
+            amountInCents: amountInCents, 
+            reference: referenceTx,
+            publicKey: WOMPI_PUBLIC_KEY,
+            redirectUrl: window.location.href 
+        });
+
+        // Abrir el modal seguro de pago
+        checkout.open(function (result) {
+            var transaction = result.transaction;
+            
+            if (transaction && transaction.status === 'APPROVED') {
+                handleSuccessfulPayment(transaction.id, amountInCents);
+            } else if (transaction && transaction.status === 'DECLINED') {
+                showNotification("La transacción fue declinada por tu entidad bancaria.", "error");
+            } else if (transaction && transaction.status === 'ERROR') {
+                showNotification("Ocurrió un error en la pasarela de pagos.", "error");
+            }
+        });
+    } catch (err) {
+        console.error("Error detallado al abrir Wompi:", err);
+        // Esto te mostrará el mensaje exacto del error en pantalla para identificarlo
+        showNotification("Error Wompi: " + (err.message || err), "error");
+    }
+}
 
         // Ejecutar después de un pago validado
         function handleSuccessfulPayment(txId, amountInCents) {
