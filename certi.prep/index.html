@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CertiPrep AI | Plataforma Completa con Autenticación OTP y Wompi</title>
-    <!-- Tailwind CSS CDN -->
+    <title>CertiPrep AI | Plataforma Educativa Premium</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -13,967 +13,899 @@
                 extend: {
                     colors: {
                         brand: {
-                            50: '#eef2ff',
-                            100: '#e0e7ff',
-                            400: '#818cf8',
-                            500: '#6366f1',
-                            600: '#4f46e5',
-                            700: '#4338ca',
-                            900: '#312e81',
-                            950: '#1e1b4b',
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            400: '#2dd4bf',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            900: '#134e4a',
+                            950: '#042f2e',
+                        },
+                        dark: {
+                            900: '#0f172a',
+                            800: '#1e293b',
+                            700: '#334155'
                         }
                     }
                 }
             }
         }
     </script>
-    <!-- SDK de Supabase para Base de Datos y Autenticación Real -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- SDK de Wompi para Pasarela de Pagos en Colombia -->
-    <script src="https://checkout.wompi.co/widget.js"></script>
-    <!-- FontAwesome para Iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .glass-panel {
-            background: rgba(15, 23, 42, 0.75);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; }
+        .content-text { font-family: 'Inter', sans-serif; line-height: 1.8; color: #cbd5e1; }
+        .content-text p { margin-bottom: 1.5rem; text-align: justify; }
+        .content-text h3 { color: #f8fafc; font-size: 1.5rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem; }
+        
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 antialiased min-h-screen flex flex-col justify-between selection:bg-brand-500 selection:text-white">
+<body class="flex flex-col min-h-screen">
 
-    <!-- NOTIFICACIÓN TIPO TOAST (REEMPLAZO DE ALERT) -->
-    <div id="toast-container" class="fixed top-20 right-5 z-50 flex flex-col gap-3 max-w-md w-full pointer-events-none"></div>
-
-    <!-- HEADER / NAVBAR GLOBAL -->
-    <header class="sticky top-0 z-40 backdrop-blur-md bg-slate-950/80 border-b border-slate-800/80">
+    <header class="sticky top-0 z-50 backdrop-blur-xl bg-dark-900/80 border-b border-dark-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center space-x-3 cursor-pointer" onclick="router.navigate('landing')">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-400 flex items-center justify-center shadow-lg shadow-brand-500/30">
-                    <i class="fa-solid fa-brain text-white text-lg"></i>
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-teal-400 flex items-center justify-center shadow-lg shadow-brand-500/20">
+                    <i class="fa-solid fa-graduation-cap text-white text-lg"></i>
                 </div>
-                <span class="text-xl font-bold bg-gradient-to-r from-white via-slate-200 to-brand-400 bg-clip-text text-transparent">CertiPrep <span class="text-brand-500">AI</span></span>
+                <span class="text-xl font-bold tracking-tight">CertiPrep AI</span>
             </div>
-
-            <nav class="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-300">
-                <button onclick="router.scrollToSection('features')" class="hover:text-white transition">Funciones</button>
-                <button onclick="router.scrollToSection('pricing')" class="hover:text-white transition">Precios</button>
-                <button onclick="router.scrollToSection('faq')" class="hover:text-white transition">Preguntas Frecuentes</button>
-            </nav>
-
-            <div class="flex items-center space-x-4" id="nav-actions">
-                <!-- Se actualiza dinámicamente según el estado de la sesión -->
+            <div id="nav-actions" class="flex items-center space-x-4">
+                <!-- Inyectado dinámicamente -->
             </div>
         </div>
     </header>
 
-    <!-- MAIN VIEW CONTAINER -->
-    <main id="app-container" class="flex-grow">
-        <!-- El contenido dinámico es inyectado por el enrutador JS -->
-    </main>
+    <main id="app-container" class="flex-grow flex flex-col"></main>
 
-    <!-- FOOTER GLOBAL -->
-    <footer class="bg-slate-900 border-t border-slate-800/80 text-slate-400 py-12 px-4 sm:px-6 lg:px-8">
-        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-            <div>
-                <div class="flex items-center space-x-3 mb-4 cursor-pointer" onclick="router.navigate('landing')">
-                    <div class="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center">
-                        <i class="fa-solid fa-brain text-white text-sm"></i>
-                    </div>
-                    <span class="text-lg font-bold text-white">CertiPrep AI</span>
-                </div>
-                <p class="text-sm text-slate-400 leading-relaxed">La plataforma SaaS líder potenciada por Inteligencia Artificial para asegurar tu certificación profesional a la primera.</p>
-            </div>
-            <div>
-                <h4 class="text-white font-semibold mb-3 text-sm">Documentos Legales</h4>
-                <ul class="space-y-2 text-sm">
-                    <li><button onclick="router.navigate('legal', 'terms')" class="hover:text-white transition text-left">Términos y Condiciones</button></li>
-                    <li><button onclick="router.navigate('legal', 'privacy')" class="hover:text-white transition text-left">Política de Privacidad</button></li>
-                </ul>
-            </div>
-            <div>
-                <h4 class="text-white font-semibold mb-3 text-sm">Certificaciones</h4>
-                <ul class="space-y-2 text-sm">
-                    <li><span class="text-slate-400">AWS Solutions Architect</span></li>
-                    <li><span class="text-slate-400">PMP (Project Management)</span></li>
-                    <li><span class="text-slate-400">Scrum Master (PSM I)</span></li>
-                </ul>
-            </div>
-            <div>
-                <h4 class="text-white font-semibold mb-3 text-sm">Atención al Cliente</h4>
-                <p class="text-sm text-slate-400 mb-2">¿Tienes dudas con tu cuenta o pagos en Colombia?</p>
-                <a href="mailto:soporte@certiprep.ai" class="text-brand-400 hover:text-brand-300 text-sm font-medium transition">soporte@certiprep.ai</a>
-            </div>
-        </div>
-        <div class="max-w-7xl mx-auto pt-8 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500">
-            <p>&copy; 2026 CertiPrep AI Inc. Todos los derechos reservados.</p>
-            <div class="flex space-x-6 mt-4 sm:mt-0">
-                <a href="#" class="hover:text-white transition"><i class="fa-brands fa-twitter"></i></a>
-                <a href="#" class="hover:text-white transition"><i class="fa-brands fa-linkedin"></i></a>
-                <a href="#" class="hover:text-white transition"><i class="fa-brands fa-github"></i></a>
-            </div>
-        </div>
-    </footer>
-
-    <!-- LÓGICA PRINCIPAL DE LA APLICACIÓN -->
     <script>
-        
-        // URL y Llave Anónima de Supabase
-        const SUPABASE_URL = 'https://roknztgkfzyndfexcllv.supabase.co'; 
-        const SUPABASE_ANON_KEY = 'sb_publishable_D-ATLuZXPBgtCa1dhCBcqg_86kZyNcR'; 
-
-        // Llave pública de Wompi Colombia (Pruebas / Producción)
-        const WOMPI_PUBLIC_KEY = 'pub_prod_Cku7YXMh34ncyvyPeMv5zpiCsfgMAV8R'; 
-
-        // Inicialización segura del cliente Supabase
-        let supabaseClient = null;
-        try {
-            if (SUPABASE_URL.startsWith('https://') && !SUPABASE_URL.includes('/rest/v1')) {
-                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                console.log("Conexión con Supabase establecida.");
+        // ==========================================
+        // MOTOR GENERADOR DE CONTENIDO MASIVO
+        // ==========================================
+        function generateModuleContent(baseText, isPremium) {
+            const repetitions = isPremium ? 15 : 6; 
+            let finalHtml = '';
+            
+            for(let i = 0; i < repetitions; i++) {
+                finalHtml += `
+                    <div class="flex flex-col lg:flex-row gap-8 mb-8 items-start">
+                        <div class="flex-1 content-text">
+                            ${baseText}
+                        </div>
+                        ${i % 2 === 0 ? `
+                        <div class="w-full lg:w-1/3 flex-shrink-0">
+                            <img src="https://placehold.co/600x400/1e293b/14b8a6?text=Ilustración+Educativa+${i+1}" 
+                                 alt="Concepto Educativo" 
+                                 class="w-full h-auto rounded-xl shadow-lg border border-dark-700 object-cover hover:scale-105 transition-transform duration-300">
+                            <p class="text-xs text-center text-slate-500 mt-2 italic">Figura ${i+1}: Representación gráfica del concepto tratado.</p>
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
             }
-        } catch(e) {
-            console.warn("Modo local resguardo activo para Supabase.", e);
-        }
-
-        function showNotification(message, type = 'info') {
-            const container = document.getElementById('toast-container');
-            if(!container) return;
             
-            const toast = document.createElement('div');
-            toast.className = `pointer-events-auto p-4 rounded-xl border shadow-xl text-xs sm:text-sm font-medium flex items-center justify-between gap-3 transition-all transform translate-y-2 opacity-0 ${
-                type === 'error' ? 'bg-red-950 border-red-800 text-red-200' :
-                type === 'success' ? 'bg-emerald-950 border-emerald-800 text-emerald-200' :
-                type === 'warning' ? 'bg-amber-950 border-amber-800 text-amber-200' :
-                'bg-slate-900 border-slate-700 text-slate-200'
-            }`;
-
-            const icon = type === 'error' ? 'fa-circle-exclamation text-red-400' :
-                         type === 'success' ? 'fa-circle-check text-emerald-400' :
-                         type === 'warning' ? 'fa-triangle-exclamation text-amber-400' :
-                         'fa-circle-info text-brand-400';
-
-            toast.innerHTML = `
-                <div class="flex items-center gap-3">
-                    <i class="fa-solid ${icon} text-base"></i>
-                    <span>${message}</span>
+            finalHtml += `
+                <div class="mt-12 bg-dark-800 border-l-4 border-brand-500 p-6 rounded-r-xl shadow-lg">
+                    <h4 class="text-brand-400 font-bold text-lg mb-2"><i class="fa-solid fa-lightbulb mr-2"></i> Pregunta de Reflexión</h4>
+                    <p class="text-slate-300 italic mb-4">Con base en los conceptos que acabas de leer, ¿Cómo aplicarías esta teoría en un escenario corporativo real para optimizar costos y tiempos?</p>
+                    <textarea class="w-full bg-dark-900 border border-dark-700 rounded-lg p-3 text-sm text-slate-200 focus:border-brand-500 focus:outline-none" rows="4" placeholder="Escribe tus reflexiones aquí..."></textarea>
                 </div>
-                <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
             `;
-
-            container.appendChild(toast);
-            
-            setTimeout(() => {
-                toast.classList.remove('translate-y-2', 'opacity-0');
-            }, 50);
-
-            setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-2');
-                setTimeout(() => toast.remove(), 300);
-            }, 5000);
+            return finalHtml;
         }
 
-        const BackendStore = {
-            // Consulta de sesión verificada
-            getSessionUser: async () => {
-                if (supabaseClient) {
-                    try {
-                        const { data: { session } } = await supabaseClient.auth.getSession();
-                        if (session && session.user) {
-                            const { data: profile } = await supabaseClient
-                                .from('profiles')
-                                .select('*')
-                                .eq('id', session.user.id)
-                                .maybeSingle();
-                            
-                            return {
-                                ...session.user,
-                                isVerified: session.user.email_confirmed_at != null || (profile && profile.verified),
-                                profileData: profile
-                            };
-                        }
-                    } catch(e) {
-                        console.warn("Error leyendo sesión de Supabase:", e);
-                    }
-                }
-                
-                // Retorno de sesión almacenada localmente
-                const fallback = JSON.parse(localStorage.getItem('certiprep_verified_user') || 'null');
-                return fallback;
+        const baseTechText = `
+            <p>La computación en la nube y el desarrollo tecnológico han revolucionado la manera en que las organizaciones gestionan sus recursos digitales. En lugar de mantener centros de datos locales costosos y difíciles de escalar, las empresas ahora confían en proveedores de nube para obtener capacidad de cómputo, almacenamiento y bases de datos bajo demanda.</p>
+            <p>Esta transformación no es solo técnica, sino también financiera y operativa. Los modelos de precios de pago por uso permiten a las startups competir con corporaciones multinacionales, democratizando el acceso a tecnologías de punta como el aprendizaje automático y el análisis de big data.</p>
+            <p>La seguridad es un componente crítico en este ecosistema. El modelo de responsabilidad compartida dicta que el proveedor protege la infraestructura subyacente, mientras que el cliente debe asegurar los datos, las configuraciones de red y la gestión de identidades.</p>
+            <p>Además, la alta disponibilidad y la tolerancia a fallos se diseñan asumiendo que los componentes individuales eventualmente fallarán. Al distribuir recursos a través de múltiples zonas de disponibilidad y regiones geográficas, los sistemas modernos pueden soportar fallos imprevistos.</p>
+        `;
+
+        const baseMedText = `
+            <p>El estudio de la anatomía y fisiología humana es el pilar fundamental de las ciencias de la salud. Comprender cómo interactúan los diferentes sistemas del cuerpo (cardiovascular, respiratorio, nervioso y endocrino) permite a los profesionales médicos diagnosticar y tratar enfermedades con precisión.</p>
+            <p>La homeostasis, el estado de equilibrio interno, es mantenido por mecanismos de retroalimentación complejos. Cuando estos mecanismos fallan, se presenta la patología. El análisis clínico detallado, junto con la interpretación de pruebas de laboratorio e imágenes diagnósticas, es crucial para identificar el origen.</p>
+            <p>La farmacología moderna ofrece herramientas terapéuticas específicas, pero requiere un profundo conocimiento de la farmacocinética y la farmacodinámica para evitar interacciones adversas y toxicidad.</p>
+            <p>En el contexto de la salud pública, la epidemiología y las medidas preventive juegan un rol vital en la reducción de la morbilidad a nivel poblacional, requiriendo protocolos rigurosos de bioseguridad.</p>
+        `;
+
+        function generateQuestions(baseQs, category, isPremium) {
+            const total = isPremium ? 25 : 10; 
+            const qs = [...baseQs];
+            for (let i = qs.length; i < total; i++) {
+                qs.push({
+                    q: `Pregunta avanzada #${i+1} de ${category}: Seleccione el enunciado o concepto que describa correctamente los estándares de esta materia.`,
+                    options: [
+                        "Opción A (Respuesta Correcta)", 
+                        "Opción B (Distractor común)", 
+                        "Opción C (Premisa incompleta)", 
+                        "Opción D (Concepto erróneo)"
+                    ],
+                    answer: 0,
+                    hint: `Analiza la premisa principal en el contexto de ${category}. La IA detecta un patrón conceptual que debes revisar.`
+                });
+            }
+            return qs;
+        }
+
+        const coursesDB = [
+            // TECNOLOGÍA
+            { id: 'c1', cat: 'Tecnología', title: 'Fundamentos de Cloud Computing', isFree: true, icon: 'fa-cloud', modules: Array.from({length: 5}, (_, i) => ({ title: `Módulo ${i+1}: Conceptos Básicos`, content: generateModuleContent(baseTechText, false) })) },
+            { id: 'c2', cat: 'Tecnología', title: 'Arquitectura AWS Avanzada', isFree: false, icon: 'fa-server', modules: Array.from({length: 12}, (_, i) => ({ title: `Módulo ${i+1}: Diseño Resiliente`, content: generateModuleContent(baseTechText, true) })) },
+            // MEDICINA
+            { id: 'c3', cat: 'Medicina', title: 'Anatomía Humana Básica', isFree: true, icon: 'fa-heart-pulse', modules: Array.from({length: 5}, (_, i) => ({ title: `Módulo ${i+1}: Sistemas del Cuerpo`, content: generateModuleContent(baseMedText, false) })) },
+            { id: 'c4', cat: 'Medicina', title: 'Farmacología Clínica Avanzada', isFree: false, icon: 'fa-pills', modules: Array.from({length: 15}, (_, i) => ({ title: `Módulo ${i+1}: Farmacodinamia`, content: generateModuleContent(baseMedText, true) })) },
+            // NEGOCIOS
+            { id: 'c5', cat: 'Negocios', title: 'Gestión Ágil de Proyectos', isFree: true, icon: 'fa-chart-pie', modules: Array.from({length: 5}, (_, i) => ({ title: `Módulo ${i+1}: Scrum Framework`, content: generateModuleContent(baseTechText, false) })) },
+            { id: 'c6', cat: 'Negocios', title: 'MBA Acelerado: Finanzas Corporativas', isFree: false, icon: 'fa-money-bill-trend-up', modules: Array.from({length: 10}, (_, i) => ({ title: `Módulo ${i+1}: Valoración de Empresas`, content: generateModuleContent(baseTechText, true) })) },
+            // DERECHO
+            { id: 'c7', cat: 'Derecho', title: 'Introducción al Derecho Penal', isFree: true, icon: 'fa-scale-balanced', modules: Array.from({length: 5}, (_, i) => ({ title: `Módulo ${i+1}: Teoría del Delito`, content: generateModuleContent(baseTechText, false) })) },
+            { id: 'c8', cat: 'Derecho', title: 'Derecho Internacional Privado', isFree: false, icon: 'fa-globe', modules: Array.from({length: 10}, (_, i) => ({ title: `Módulo ${i+1}: Jurisdicción`, content: generateModuleContent(baseTechText, true) })) },
+            // IDIOMAS
+            { id: 'c9', cat: 'Idiomas', title: 'Inglés Básico B1', isFree: true, icon: 'fa-language', modules: Array.from({length: 5}, (_, i) => ({ title: `Módulo ${i+1}: Estructura Gramatical`, content: generateModuleContent(baseTechText, false) })) },
+            { id: 'c10', cat: 'Idiomas', title: 'Preparación TOEFL iBT Pro', isFree: false, icon: 'fa-spell-check', modules: Array.from({length: 12}, (_, i) => ({ title: `Módulo ${i+1}: Speaking & Writing`, content: generateModuleContent(baseTechText, true) })) },
+            // INGENIERÍA
+            { id: 'c11', cat: 'Ingeniería', title: 'Física Clásica: Mecánica', isFree: true, icon: 'fa-gear', modules: Array.from({length: 5}, (_, i) => ({ title: `Módulo ${i+1}: Leyes de Newton`, content: generateModuleContent(baseTechText, false) })) },
+            { id: 'c12', cat: 'Ingeniería', title: 'Diseño Estructural Avanzado', isFree: false, icon: 'fa-building', modules: Array.from({length: 15}, (_, i) => ({ title: `Módulo ${i+1}: Resistencia de Materiales`, content: generateModuleContent(baseTechText, true) })) }
+        ];
+
+        const simulatorsDB = [
+            // TECNOLOGÍA
+            { id: 's1', cat: 'Tecnología', title: 'Test Básico: AWS Cloud', isFree: true, questions: generateQuestions([
+                { q: "¿Cuál es una ventaja clave de la nube?", options: ["Pago por uso", "Compras de hardware", "Mantenimiento local"], answer: 0, hint: "Recuerda que no pagas por adelantado." },
+                { q: "¿Qué servicio provee DNS en AWS?", options: ["Route 53", "S3", "EC2"], answer: 0, hint: "Es el servicio que gestiona rutas y dominios." }
+            ], 'Tecnología', false)},
+            { id: 's2', cat: 'Tecnología', title: 'Simulacro Pro AWS Architect', isFree: false, questions: generateQuestions([
+                { q: "¿Qué clase de S3 es más barata para archivo a largo plazo?", options: ["S3 Standard", "S3 Glacier Deep Archive", "S3 One Zone"], answer: 1, hint: "Deep Archive es para retención de años." },
+                { q: "¿Cómo proteger instancias EC2 de ataques web?", options: ["WAF", "Security Groups", "Ambas"], answer: 2, hint: "La seguridad se implementa en capas." }
+            ], 'Tecnología', true)},
+            // MEDICINA
+            { id: 's3', cat: 'Medicina', title: 'Test Básico: Anatomía', isFree: true, questions: generateQuestions([
+                { q: "¿Cuál es el hueso más largo del cuerpo humano?", options: ["Fémur", "Tibia", "Húmero"], answer: 0, hint: "Se encuentra en la pierna superior." },
+                { q: "¿Qué órgano produce la insulina?", options: ["Hígado", "Páncreas", "Riñón"], answer: 1, hint: "Es una glándula detrás del estómago." }
+            ], 'Medicina', false)},
+            { id: 's4', cat: 'Medicina', title: 'Simulacro ENARM / MIR Pro', isFree: false, questions: generateQuestions([
+                { q: "Tratamiento de primera línea para IAM con elevación del ST:", options: ["Angioplastia primaria", "Observación", "Paracetamol"], answer: 0, hint: "Hay que reperfundir rápidamente." },
+                { q: "Causa más común de hipotiroidismo:", options: ["Enfermedad de Hashimoto", "Déficit de Yodo", "Cirugía"], answer: 0, hint: "Es una enfermedad autoinmune." }
+            ], 'Medicina', true)},
+            // NEGOCIOS
+            { id: 's5', cat: 'Negocios', title: 'Test Básico: Gestión Ágil', isFree: true, questions: generateQuestions([
+                { q: "¿Cuánto dura típicamente un Sprint en Scrum?", options: ["1 a 4 semanas", "6 meses", "1 día"], answer: 0, hint: "Es un ciclo iterativo corto." },
+                { q: "¿Quién prioriza el Product Backlog?", options: ["Scrum Master", "Product Owner", "Developer"], answer: 1, hint: "Es el dueño del producto." }
+            ], 'Negocios', false)},
+            { id: 's6', cat: 'Negocios', title: 'Simulacro PMP Pro', isFree: false, questions: generateQuestions([
+                { q: "¿Qué proceso pertenece al grupo de Monitoreo y Control?", options: ["Dirigir el trabajo", "Validar el alcance", "Desarrollar el Acta"], answer: 1, hint: "Asegura que los entregables cumplan requisitos." },
+                { q: "La técnica de estimación PERT usa:", options: ["1 valor", "2 valores", "3 valores (Optimista, Pesimista, Probable)"], answer: 2, hint: "Calcula un promedio ponderado." }
+            ], 'Negocios', true)},
+            // DERECHO
+            { id: 's7', cat: 'Derecho', title: 'Test Básico: Conceptos Penales', isFree: true, questions: generateQuestions([
+                { q: "¿Qué es el Habeas Corpus?", options: ["Protección contra detención ilegal", "Un impuesto", "Un contrato"], answer: 0, hint: "Protege la libertad individual." },
+                { q: "¿Qué principio rige la ley penal en el tiempo?", options: ["Irretroactividad", "Culpa", "Dolo"], answer: 0, hint: "La ley no aplica al pasado salvo favorabilidad." }
+            ], 'Derecho', false)},
+            { id: 's8', cat: 'Derecho', title: 'Simulacro Bar Exam Pro', isFree: false, questions: generateQuestions([
+                { q: "¿Qué elemento no es esencial en un contrato?", options: ["Consentimiento", "Objeto", "Notarización"], answer: 2, hint: "Muchos contratos son verbales y válidos." },
+                { q: "El control de convencionalidad es ejercido por:", options: ["Jueces nacionales", "Corte IDH", "Ambos"], answer: 2, hint: "Tanto tribunales internos como internacionales." }
+            ], 'Derecho', true)},
+            // IDIOMAS
+            { id: 's9', cat: 'Idiomas', title: 'Placement Test Básico', isFree: true, questions: generateQuestions([], 'Idiomas', false) },
+            { id: 's10', cat: 'Idiomas', title: 'Simulacro TOEFL Pro', isFree: false, questions: generateQuestions([], 'Idiomas', true) },
+            // INGENIERÍA
+            { id: 's11', cat: 'Ingeniería', title: 'Test Básico de Física', isFree: true, questions: generateQuestions([], 'Ingeniería', false) },
+            { id: 's12', cat: 'Ingeniería', title: 'Simulacro Calculo Estructural', isFree: false, questions: generateQuestions([], 'Ingeniería', true) }
+        ];
+
+        const AuthStore = {
+            getUser: () => JSON.parse(localStorage.getItem('certiprep_user')),
+            setUser: (user) => localStorage.setItem('certiprep_user', JSON.stringify(user)),
+            logout: () => localStorage.removeItem('certiprep_user'),
+            
+            getPayments: () => JSON.parse(localStorage.getItem('certiprep_payments')) || [],
+            addPayment: (tx) => {
+                const payments = AuthStore.getPayments();
+                payments.push(tx);
+                localStorage.setItem('certiprep_payments', JSON.stringify(payments));
             },
 
-            // Registro inicial y envío del código OTP de 6 dígitos
-            register: async (email, password, fullName) => {
-                if (supabaseClient) {
-                    const { data, error } = await supabaseClient.auth.signUp({
-                        email,
-                        password,
-                        options: {
-                            data: { full_name: fullName }
-                        }
+            getUsersDb: () => {
+                let db = JSON.parse(localStorage.getItem('certiprep_users_db')) || [];
+                // Asegurar que el admin siempre esté listado
+                if(!db.find(u => u.email === 'admin@certiprep.ai')) {
+                    db.unshift({
+                        name: 'Administrador',
+                        email: 'admin@certiprep.ai',
+                        plan: 'Pro (Admin)',
+                        registeredAt: '2026-01-01 10:00',
+                        lastLogin: new Date().toLocaleString('es-CO'),
+                        avatar: ''
                     });
-                    if (error) throw error;
-                    
-                    sessionStorage.setItem('certiprep_pending_email', email);
-                    return { user: data.user, requiresOtp: true };
-                } else {
-                    // Modo simulado local con código de prueba 123456
-                    const pendingUser = {
-                        email,
-                        fullName,
-                        password,
-                        mockCode: '123456'
-                    };
-                    sessionStorage.setItem('certiprep_pending_mock', JSON.stringify(pendingUser));
-                    sessionStorage.setItem('certiprep_pending_email', email);
-                    return { requiresOtp: true };
                 }
+                return db;
             },
-
-            // Verificación formal del código OTP
-            verifyOtp: async (email, token) => {
-                if (supabaseClient) {
-                    let userObj = null;
-                    const { data, error } = await supabaseClient.auth.verifyOtp({
-                        email,
-                        token,
-                        type: 'signup'
-                    });
-
-                    if (error) {
-                        const { data: data2, error: error2 } = await supabaseClient.auth.verifyOtp({
-                            email,
-                            token,
-                            type: 'email'
-                        });
-                        if (error2) throw error2;
-                        userObj = data2.user;
-                    } else {
-                        userObj = data.user;
-                    }
-
-                    if (userObj) {
-                        await supabaseClient.from('profiles').upsert({
-                            id: userObj.id,
-                            email: userObj.email,
-                            full_name: userObj.user_metadata?.full_name || 'Estudiante',
-                            verified: true,
-                            plan: 'Básico'
-                        });
-                    }
-                    return userObj;
-                } else {
-                    const pendingRaw = sessionStorage.getItem('certiprep_pending_mock');
-                    const pending = pendingRaw ? JSON.parse(pendingRaw) : null;
-
-                    if (pending && pending.email === email && (token === '123456' || token === pending.mockCode)) {
-                        const verifiedUser = {
-                            id: 'usr-' + Date.now(),
-                            email: pending.email,
-                            user_metadata: { full_name: pending.fullName },
-                            profileData: { plan: 'Básico', lang: 'es', theme: 'dark', notifications: true },
-                            isVerified: true
-                        };
-                        localStorage.setItem('certiprep_verified_user', JSON.stringify(verifiedUser));
-                        sessionStorage.removeItem('certiprep_pending_mock');
-                        sessionStorage.removeItem('certiprep_pending_email');
-                        return verifiedUser;
-                    } else {
-                        throw new Error('Código incorrecto. En modo prueba utiliza el código 123456.');
-                    }
+            updateUserDb: (email, newProps) => {
+                let db = AuthStore.getUsersDb();
+                const idx = db.findIndex(u => u.email === email);
+                if(idx !== -1) {
+                    db[idx] = { ...db[idx], ...newProps };
+                    localStorage.setItem('certiprep_users_db', JSON.stringify(db));
                 }
-            },
-
-            // Inicio de sesión convencional
-            login: async (email, password) => {
-                if (supabaseClient) {
-                    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-                    if (error) throw error;
-                    
-                    if (!data.user.email_confirmed_at) {
-                        sessionStorage.setItem('certiprep_pending_email', email);
-                        throw new Error('NEEDS_VERIFICATION');
-                    }
-                    return data.user;
-                } else {
-                    let localUser = JSON.parse(localStorage.getItem('certiprep_verified_user') || 'null');
-                    if (!localUser || localUser.email !== email) {
-                        localUser = {
-                            id: 'usr-' + Date.now(),
-                            email,
-                            user_metadata: { full_name: email.split('@')[0] },
-                            profileData: { plan: 'Básico', lang: 'es', theme: 'dark', notifications: true },
-                            isVerified: true
-                        };
-                        localStorage.setItem('certiprep_verified_user', JSON.stringify(localUser));
-                    }
-                    return localUser;
-                }
-            },
-
-            // Cierre seguro de sesión
-            logout: async () => {
-                if (supabaseClient) {
-                    try { await supabaseClient.auth.signOut(); } catch(e){}
-                }
-                localStorage.removeItem('certiprep_verified_user');
-                sessionStorage.clear();
             }
         };
 
         const router = {
-            currentView: 'landing',
-            navigate: async (view, param = null) => {
-                router.currentView = view;
+            navigate: (view, param = null) => {
                 const container = document.getElementById('app-container');
+                const user = AuthStore.getUser();
+                
+                const nav = document.getElementById('nav-actions');
+                if (user) {
+                    nav.innerHTML = `<button onclick="router.navigate('${user.role === 'admin' ? 'admin' : 'dashboard'}')" class="bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium px-5 py-2.5 rounded-xl shadow-lg transition">Ir al Panel</button>`;
+                } else {
+                    nav.innerHTML = `
+                        <button onclick="router.navigate('auth', 'login')" class="text-sm font-medium text-slate-300 hover:text-white px-4 py-2">Iniciar Sesión</button>
+                        <button onclick="router.navigate('auth', 'register')" class="bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium px-5 py-2.5 rounded-xl shadow-lg">Regístrate</button>
+                    `;
+                }
+
                 window.scrollTo(0, 0);
 
-                const user = await BackendStore.getSessionUser();
-                updateNavHeader(user);
-
-                if (view === 'landing') {
-                    container.innerHTML = renderLanding();
-                } else if (view === 'auth') {
-                    container.innerHTML = renderAuth(param);
-                } else if (view === 'verify-otp') {
-                    const email = param || sessionStorage.getItem('certiprep_pending_email') || '';
-                    container.innerHTML = renderOtpVerification(email);
-                } else if (view === 'dashboard') {
-                    // VERIFICACIÓN ESTRICTA DE SEGURIDAD
-                    if (!user || !user.isVerified) {
-                        showNotification('Acceso restringido. Debes verificar tu correo electrónico para ingresar.', 'warning');
-                        router.navigate('auth', 'login');
-                        return;
-                    }
+                if (view === 'landing') container.innerHTML = renderLanding();
+                else if (view === 'auth') container.innerHTML = renderAuth(param);
+                else if (view === 'dashboard') {
+                    if (!user) return router.navigate('auth', 'login');
+                    if (user.role === 'admin') return router.navigate('admin');
                     container.innerHTML = renderDashboard(user);
-                } else if (view === 'legal') {
-                    container.innerHTML = renderLegal(param);
+                    if (currentDashboardTab !== 'ajustes') {
+                        renderCatalog(user);
+                    }
                 }
-            },
-
-            scrollToSection: (sectionId) => {
-                if (router.currentView !== 'landing') {
-                    router.navigate('landing').then(() => {
-                        setTimeout(() => {
-                            const el = document.getElementById(sectionId);
-                            if (el) el.scrollIntoView({ behavior: 'smooth' });
-                        }, 100);
-                    });
-                } else {
-                    const el = document.getElementById(sectionId);
-                    if (el) el.scrollIntoView({ behavior: 'smooth' });
+                else if (view === 'admin') {
+                    if (!user || user.role !== 'admin') return router.navigate('landing');
+                    container.innerHTML = renderAdmin(user);
                 }
+                else if (view === 'course') container.innerHTML = renderCourseView(param);
+                else if (view === 'simulator') container.innerHTML = renderSimulatorView(param);
             }
         };
 
-        function updateNavHeader(user) {
-            const navActions = document.getElementById('nav-actions');
-            if (!navActions) return;
+        function renderLanding() {
+            return `
+                <section class="py-24 text-center px-4 flex-grow flex flex-col justify-center bg-gradient-to-b from-dark-900 to-dark-800">
+                    <h1 class="text-5xl md:text-7xl font-extrabold text-white mb-6 tracking-tight">Aprende sin límites.</h1>
+                    <p class="text-lg text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">Únete a la plataforma con miles de módulos de Medicina, Tecnología, Negocios y Derecho. Textos inmersivos y simuladores impulsados por IA.</p>
+                    <div class="flex flex-col sm:flex-row justify-center gap-4">
+                        <button onclick="router.navigate('auth', 'register')" class="bg-brand-600 hover:bg-brand-500 text-white font-semibold px-8 py-4 rounded-xl shadow-lg shadow-brand-500/20 transition transform hover:-translate-y-1">Empieza Gratis Hoy</button>
+                    </div>
+                </section>
+            `;
+        }
 
-            if (user && user.isVerified) {
-                navActions.innerHTML = `
-                    <button onclick="router.navigate('dashboard')" class="bg-brand-600/20 text-brand-300 border border-brand-500/30 hover:bg-brand-600 hover:text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-medium transition">
-                        <i class="fa-solid fa-gauge mr-1.5"></i> Mi Panel
-                    </button>
-                    <button onclick="handleLogout()" class="text-slate-400 hover:text-red-400 text-xs sm:text-sm font-medium px-3 py-2 transition">
-                        Cerrar Sesión
-                    </button>
-                `;
-            } else {
-                navActions.innerHTML = `
-                    <button onclick="router.navigate('auth', 'login')" class="hidden sm:inline-flex text-sm font-medium text-slate-300 hover:text-white px-4 py-2 transition">Iniciar Sesión</button>
-                    <button onclick="router.navigate('auth', 'register')" class="bg-brand-600 hover:bg-brand-500 text-white text-sm font-medium px-5 py-2.5 rounded-xl shadow-lg shadow-brand-600/20 transition transform active:scale-95">Empezar Gratis</button>
-                `;
+        function renderAuth(mode) {
+            const isLogin = mode === 'login';
+            return `
+                <div class="flex-grow flex items-center justify-center px-4 py-12">
+                    <div class="bg-dark-800 border border-dark-700 rounded-2xl max-w-md w-full p-8 shadow-2xl">
+                        <h2 class="text-2xl font-bold text-white text-center mb-2">${isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}</h2>
+                        <p class="text-slate-400 text-center text-sm mb-6">${isLogin ? 'Ingresa tus credenciales' : 'Regístrate y luego inicia sesión'}</p>
+                        
+                        <div id="auth-alert" class="hidden mb-4 p-3 rounded-lg text-sm font-medium"></div>
+
+                        <form onsubmit="handleAuth(event, '${mode}')" class="space-y-4">
+                            ${!isLogin ? `
+                                <div><label class="block text-xs text-slate-400 mb-1">Nombre</label><input type="text" id="auth-name" required class="w-full bg-dark-900 border border-dark-700 rounded-lg p-3 text-white focus:border-brand-500 outline-none"></div>
+                            ` : ''}
+                            <div><label class="block text-xs text-slate-400 mb-1">Correo Electrónico</label><input type="email" id="auth-email" required class="w-full bg-dark-900 border border-dark-700 rounded-lg p-3 text-white focus:border-brand-500 outline-none"></div>
+                            <div><label class="block text-xs text-slate-400 mb-1">Contraseña</label><input type="password" id="auth-password" required class="w-full bg-dark-900 border border-dark-700 rounded-lg p-3 text-white focus:border-brand-500 outline-none"></div>
+                            
+                            <button type="submit" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-bold py-3 rounded-lg transition mt-4">${isLogin ? 'Entrar' : 'Registrarse'}</button>
+                        </form>
+                        
+                        <div class="mt-6 text-center text-sm text-slate-400">
+                            <button onclick="router.navigate('auth', '${isLogin ? 'register' : 'login'}')" class="text-brand-400 hover:underline">${isLogin ? 'Crear una cuenta nueva' : 'Ya tengo cuenta. Iniciar sesión.'}</button>
+                        </div>
+                        ${isLogin ? `<p class="mt-4 text-xs text-center text-slate-500 border-t border-dark-700 pt-4">¿Eres administrador? Usa admin@certiprep.ai / admin123</p>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        let currentFilter = 'Todos';
+        let currentDashboardTab = 'cursos';
+
+        function renderDashboard(user) {
+            const isPro = user.plan === 'Pro';
+            
+            let categories = [];
+            if (currentDashboardTab === 'cursos') {
+                categories = ['Todos', ...new Set(coursesDB.map(i => i.cat))];
+            } else if (currentDashboardTab === 'simulacros') {
+                categories = ['Todos', ...new Set(simulatorsDB.map(i => i.cat))];
+            }
+            
+            const filterHtml = categories.map(c => `
+                <button onclick="applyFilter('${c}')" class="px-4 py-1.5 rounded-full text-sm font-medium transition ${currentFilter === c ? 'bg-brand-600 text-white' : 'bg-dark-800 text-slate-400 hover:bg-dark-700 hover:text-white'}">
+                    ${c}
+                </button>
+            `).join('');
+
+            const avatarHtml = user.avatar 
+                ? `<img src="${user.avatar}" alt="Avatar" class="w-full h-full object-cover">`
+                : `<span class="text-white font-bold text-xl">${user.name.charAt(0).toUpperCase()}</span>`;
+
+            return `
+                <div class="max-w-7xl mx-auto px-4 py-8 flex flex-col md:flex-row gap-8 w-full">
+                    <!-- SIDEBAR -->
+                    <div class="w-full md:w-64 flex-shrink-0">
+                        <div class="bg-dark-800 p-5 rounded-2xl border border-dark-700 mb-6 sticky top-24">
+                            <div class="w-16 h-16 rounded-full bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center overflow-hidden mb-3 shadow-md mx-auto">
+                                ${avatarHtml}
+                            </div>
+                            <h3 class="font-bold text-white text-center truncate">${user.name}</h3>
+                            <p class="text-xs text-slate-400 mb-3 truncate text-center">${user.email}</p>
+                            <div class="text-center mb-3">
+                                <div class="inline-flex px-3 py-1 rounded-full text-xs font-bold ${isPro ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-dark-900 text-slate-300 border border-dark-700'}">
+                                    Membresía: ${user.plan}
+                                </div>
+                            </div>
+                            
+                            ${!isPro ? `
+                                <div class="mt-6 border-t border-dark-700 pt-4">
+                                    <p class="text-xs text-slate-400 mb-3 text-center">Desbloquea miles de horas de contenido y simuladores.</p>
+                                    <button onclick="simulateWompiPayment()" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-medium py-2.5 rounded-xl shadow-lg transition flex justify-center items-center gap-2">
+                                        <i class="fa-solid fa-credit-card"></i> Pagar Pro ($116.000)
+                                    </button>
+                                </div>
+                            ` : `
+                                <div class="mt-6 border-t border-dark-700 pt-4 text-center">
+                                    <i class="fa-solid fa-crown text-amber-400 text-2xl mb-2"></i>
+                                    <p class="text-xs text-amber-400 font-medium">Tienes acceso total ilimitado.</p>
+                                </div>
+                            `}
+                            
+                            <div class="mt-6 border-t border-dark-700 pt-4 space-y-2">
+                                <button onclick="switchDashboardTab('cursos')" class="w-full text-left px-4 py-2.5 rounded-xl transition text-sm font-medium flex items-center gap-2 ${currentDashboardTab === 'cursos' ? 'bg-brand-900/50 text-brand-400 border border-brand-800' : 'text-slate-400 hover:bg-dark-700 hover:text-white'}">
+                                    <i class="fa-solid fa-book-open w-5"></i> Cursos Académicos
+                                </button>
+                                <button onclick="switchDashboardTab('simulacros')" class="w-full text-left px-4 py-2.5 rounded-xl transition text-sm font-medium flex items-center gap-2 ${currentDashboardTab === 'simulacros' ? 'bg-brand-900/50 text-brand-400 border border-brand-800' : 'text-slate-400 hover:bg-dark-700 hover:text-white'}">
+                                    <i class="fa-solid fa-laptop-code w-5"></i> Simuladores
+                                </button>
+                                <button onclick="switchDashboardTab('ajustes')" class="w-full text-left px-4 py-2.5 rounded-xl transition text-sm font-medium flex items-center gap-2 ${currentDashboardTab === 'ajustes' ? 'bg-brand-900/50 text-brand-400 border border-brand-800' : 'text-slate-400 hover:bg-dark-700 hover:text-white'}">
+                                    <i class="fa-solid fa-gear w-5"></i> Ajustes de Perfil
+                                </button>
+                            </div>
+
+                            <button onclick="handleLogout()" class="w-full mt-6 text-red-400 hover:text-red-300 text-sm font-medium transition text-left px-4"><i class="fa-solid fa-right-from-bracket mr-2"></i> Cerrar Sesión</button>
+                        </div>
+                    </div>
+
+                    <!-- CATÁLOGO / CONTENIDO PRINCIPAL -->
+                    <div class="flex-grow">
+                        ${currentDashboardTab !== 'ajustes' ? `
+                            <div class="flex overflow-x-auto pb-4 mb-6 gap-2 hide-scrollbar">
+                                ${filterHtml}
+                            </div>
+                        ` : ''}
+                        
+                        ${currentDashboardTab === 'cursos' ? `
+                            <h2 class="text-2xl font-bold text-white mb-6 border-b border-dark-800 pb-2"><i class="fa-solid fa-book-open text-brand-500 mr-2"></i> Cursos e Inmersiones</h2>
+                            <div id="courses-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12"></div>
+                        ` : ''}
+
+                        ${currentDashboardTab === 'simulacros' ? `
+                            <h2 class="text-2xl font-bold text-white mb-6 border-b border-dark-800 pb-2"><i class="fa-solid fa-laptop-code text-brand-500 mr-2"></i> Simuladores de Examen</h2>
+                            <div id="simulators-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                        ` : ''}
+
+                        ${currentDashboardTab === 'ajustes' ? renderSettingsTab(user) : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        window.switchDashboardTab = function(tab) {
+            currentDashboardTab = tab;
+            currentFilter = 'Todos';
+            const user = AuthStore.getUser();
+            document.getElementById('app-container').innerHTML = renderDashboard(user);
+            if (tab !== 'ajustes') {
+                renderCatalog(user);
+            }
+        };
+
+        function renderSettingsTab(user) {
+            return `
+                <div class="bg-dark-800 border border-dark-700 rounded-2xl p-8 max-w-2xl">
+                    <h2 class="text-2xl font-bold text-white mb-6 border-b border-dark-700 pb-4"><i class="fa-solid fa-user-pen text-brand-500 mr-2"></i> Editar Perfil y Avatar</h2>
+                    
+                    <form onsubmit="handleUpdateProfile(event)" class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-400 mb-2">Nombre Completo</label>
+                            <input type="text" id="profile-name" value="${user.name}" required class="w-full bg-dark-900 border border-dark-700 rounded-lg p-3 text-slate-200 focus:border-brand-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-400 mb-2">Correo Electrónico (No modificable)</label>
+                            <input type="email" value="${user.email}" readonly class="w-full bg-dark-900 border border-dark-700 rounded-lg p-3 text-slate-500 focus:outline-none cursor-not-allowed">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-400 mb-2">Foto de Perfil (URL de imagen o carga local)</label>
+                            <input type="url" id="profile-avatar" value="${user.avatar || ''}" placeholder="https://ejemplo.com/mi-foto.jpg" class="w-full bg-dark-900 border border-dark-700 rounded-lg p-3 text-slate-200 focus:border-brand-500 focus:outline-none">
+                            <p class="text-xs text-slate-500 mt-1">Puedes pegar el enlace directo de una imagen web o avatar.</p>
+                        </div>
+                        
+                        <button type="submit" class="bg-brand-600 hover:bg-brand-500 text-white font-medium px-6 py-3 rounded-xl transition shadow-lg">
+                            Guardar Cambios
+                        </button>
+                    </form>
+                </div>
+            `;
+        }
+
+        window.handleUpdateProfile = function(e) {
+            e.preventDefault();
+            const newName = document.getElementById('profile-name').value.trim();
+            const newAvatar = document.getElementById('profile-avatar').value.trim();
+            
+            let user = AuthStore.getUser();
+            user.name = newName;
+            user.avatar = newAvatar;
+            
+            AuthStore.setUser(user);
+            AuthStore.updateUserDb(user.email, { name: newName, avatar: newAvatar });
+            
+            alert("¡Perfil actualizado con éxito!");
+            router.navigate('dashboard');
+        };
+
+        function renderCatalog(user) {
+            const isPro = user.plan === 'Pro';
+            
+            if (currentDashboardTab === 'cursos') {
+                const filteredCourses = currentFilter === 'Todos' ? coursesDB : coursesDB.filter(c => c.cat === currentFilter);
+                document.getElementById('courses-grid').innerHTML = filteredCourses.map(c => createCardHtml(c, isPro, 'course')).join('');
+            } else if (currentDashboardTab === 'simulacros') {
+                const filteredSims = currentFilter === 'Todos' ? simulatorsDB : simulatorsDB.filter(s => s.cat === currentFilter);
+                document.getElementById('simulators-grid').innerHTML = filteredSims.map(s => createCardHtml(s, isPro, 'simulator')).join('');
             }
         }
 
-        function renderLanding() {
-            return `
-                <section class="relative pt-16 pb-28 overflow-hidden">
-                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-                        <div class="inline-flex items-center space-x-2 bg-brand-950/80 border border-brand-800/60 rounded-full px-4 py-1.5 mb-8">
-                            <span class="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                            <span class="text-xs font-medium text-brand-300">Autenticación por Código OTP & Pagos Wompi Colombia</span>
-                        </div>
-                        <h1 class="text-4xl sm:text-6xl font-extrabold text-white tracking-tight max-w-4xl mx-auto mb-6 leading-tight">
-                            Asegura tu certificación profesional <span class="bg-gradient-to-r from-brand-500 via-indigo-300 to-brand-400 bg-clip-text text-transparent">a la primera</span>
-                        </h1>
-                        <p class="text-lg text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
-                            Simuladores de exámenes predictivos con IA adaptativa. Verifica tu cuenta de forma segura con un código numérico y prepárate con garantía de aprobación.
-                        </p>
-                        <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-4">
-                            <button onclick="router.navigate('auth', 'register')" class="w-full sm:w-auto bg-brand-600 hover:bg-brand-500 text-white font-semibold px-8 py-4 rounded-xl shadow-xl shadow-brand-600/30 transition transform hover:-translate-y-0.5">
-                                Empieza Gratis Ahora <i class="fa-solid fa-arrow-right ml-2"></i>
-                            </button>
-                            <button onclick="router.scrollToSection('pricing')" class="w-full sm:w-auto bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-300 font-medium px-8 py-4 rounded-xl transition">
-                                Ver Planes y Precios
-                            </button>
-                        </div>
-                    </div>
-                </section>
-
-                <section id="features" class="py-20 bg-slate-900/60 border-t border-slate-800/80">
-                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div class="text-center max-w-3xl mx-auto mb-16">
-                            <h2 class="text-xs font-semibold text-brand-400 uppercase tracking-widest mb-2">Tecnología de Aprendizaje</h2>
-                            <h3 class="text-3xl font-bold text-white">Diseñado para que estudies menos y apruebes más</h3>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            <div class="glass-panel p-8 rounded-2xl space-y-4">
-                                <div class="w-12 h-12 rounded-xl bg-brand-600/20 border border-brand-500/30 flex items-center justify-center text-brand-400 text-xl">
-                                    <i class="fa-solid fa-shield-cat"></i>
-                                </div>
-                                <h4 class="text-lg font-bold text-white">Autenticación Segura OTP</h4>
-                                <p class="text-sm text-slate-400 leading-relaxed">Ingreso protegido mediante un código numérico de 6 dígitos enviado a tu correo. Sin enlaces caídos ni bloqueos por localhost.</p>
-                            </div>
-
-                            <div class="glass-panel p-8 rounded-2xl space-y-4">
-                                <div class="w-12 h-12 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 text-xl">
-                                    <i class="fa-solid fa-robot"></i>
-                                </div>
-                                <h4 class="text-lg font-bold text-white">Tutor IA Personalizado</h4>
-                                <p class="text-sm text-slate-400 leading-relaxed">Explicaciones paso a paso de cada pregunta errónea con base en la documentación oficial de AWS, PMP y Scrum.</p>
-                            </div>
-
-                            <div class="glass-panel p-8 rounded-2xl space-y-4">
-                                <div class="w-12 h-12 rounded-xl bg-emerald-600/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xl">
-                                    <i class="fa-solid fa-credit-card"></i>
-                                </div>
-                                <h4 class="text-lg font-bold text-white">Pagos Locales en Colombia</h4>
-                                <p class="text-sm text-slate-400 leading-relaxed">Aceptamos transferencias mediante PSE, Nequi, Daviplata o Tarjetas a través de la pasarela segura Wompi.</p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <section id="pricing" class="py-20 bg-slate-950 border-t border-slate-800">
-                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div class="text-center mb-16">
-                            <h2 class="text-3xl font-bold text-white mb-4">Planes diseñados para tu éxito</h2>
-                            <p class="text-slate-400">Paga en pesos colombianos con PSE, Nequi o Tarjetas.</p>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-                            <div class="bg-slate-900 border border-slate-800 p-8 rounded-2xl flex flex-col justify-between">
-                                <div>
-                                    <h3 class="text-lg font-bold text-white mb-2">Básico</h3>
-                                    <p class="text-slate-400 text-sm mb-6">Para evaluar tu nivel inicial.</p>
-                                    <div class="text-3xl font-extrabold text-white mb-6">$0 <span class="text-xs font-normal text-slate-400">/ gratis</span></div>
-                                    <ul class="space-y-3 text-sm text-slate-300 mb-8">
-                                        <li><i class="fa-solid fa-check text-brand-500 mr-2"></i> 1 Simulacro corto de prueba</li>
-                                        <li><i class="fa-solid fa-check text-brand-500 mr-2"></i> Estadísticas básicas de rendimiento</li>
-                                    </ul>
-                                </div>
-                                <button onclick="router.navigate('auth', 'register')" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-medium py-3 rounded-xl transition">Empezar Gratis</button>
-                            </div>
-
-                            <div class="bg-slate-900 border-2 border-brand-500 p-8 rounded-2xl flex flex-col justify-between relative shadow-xl shadow-brand-500/10">
-                                <div class="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-brand-600 text-white text-xs font-semibold px-3 py-1 rounded-full">Más Popular</div>
-                                <div>
-                                    <h3 class="text-lg font-bold text-white mb-2">Pase 30 Días (IA Pro)</h3>
-                                    <p class="text-slate-400 text-sm mb-6">Acceso ilimitado con tutoría de IA.</p>
-                                    <div class="text-3xl font-extrabold text-white mb-6">~$116.000 <span class="text-xs font-normal text-slate-400">COP ($29 USD)</span></div>
-                                    <ul class="space-y-3 text-sm text-slate-300 mb-8">
-                                        <li><i class="fa-solid fa-check text-brand-500 mr-2"></i> Simulacros ilimitados</li>
-                                        <li><i class="fa-solid fa-check text-brand-500 mr-2"></i> Tutor de IA activo 24/7</li>
-                                        <li><i class="fa-solid fa-check text-brand-500 mr-2"></i> Pagos con PSE / Nequi / Wompi</li>
-                                    </ul>
-                                </div>
-                                <button onclick="payWithWompi(11600000, 'Pase Pro 30 Dias')" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-medium py-3 rounded-xl transition shadow-lg shadow-brand-600/30">Pagar con Wompi</button>
-                            </div>
-
-                            <div class="bg-slate-900 border border-slate-800 p-8 rounded-2xl flex flex-col justify-between">
-                                <div>
-                                    <h3 class="text-lg font-bold text-white mb-2">Garantía AI Pro (90 Días)</h3>
-                                    <p class="text-slate-400 text-sm mb-6">Preparación garantizada con reembolso.</p>
-                                    <div class="text-3xl font-extrabold text-white mb-6">~$235.000 <span class="text-xs font-normal text-slate-400">COP ($59 USD)</span></div>
-                                    <ul class="space-y-3 text-sm text-slate-300 mb-8">
-                                        <li><i class="fa-solid fa-check text-brand-500 mr-2"></i> Todo lo del plan Pro</li>
-                                        <li><i class="fa-solid fa-check text-brand-500 mr-2"></i> Garantía de reembolso en caso de reprobar</li>
-                                        <li><i class="fa-solid fa-check text-brand-500 mr-2"></i> Rutas adaptativas por temas</li>
-                                    </ul>
-                                </div>
-                                <button onclick="payWithWompi(23500000, 'Garantia AI Pro 90 Dias')" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-medium py-3 rounded-xl transition">Pagar con Wompi</button>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <section id="faq" class="py-20 bg-slate-900/40 border-t border-slate-800">
-                    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div class="text-center mb-12">
-                            <h2 class="text-2xl font-bold text-white">Preguntas Frecuentes</h2>
-                        </div>
-                        <div class="space-y-4">
-                            <details class="bg-slate-900 border border-slate-800 rounded-xl p-5 group">
-                                <summary class="font-medium text-white cursor-pointer list-none flex justify-between items-center">
-                                    <span>¿Cómo funciona el código de verificación OTP?</span>
-                                    <i class="fa-solid fa-chevron-down text-xs text-slate-400 group-open:rotate-180 transition-transform"></i>
-                                </summary>
-                                <p class="text-sm text-slate-400 mt-3 leading-relaxed">Al registrarte, se envía un código numérico de 6 dígitos a tu buzón de correo electrónico. Lo ingresas directamente en la aplicación para activar tu cuenta de forma inmediata y segura.</p>
-                            </details>
-
-                            <details class="bg-slate-900 border border-slate-800 rounded-xl p-5 group">
-                                <summary class="font-medium text-white cursor-pointer list-none flex justify-between items-center">
-                                    <span>¿Qué métodos de pago están habilitados en Colombia?</span>
-                                    <i class="fa-solid fa-chevron-down text-xs text-slate-400 group-open:rotate-180 transition-transform"></i>
-                                </summary>
-                                <p class="text-sm text-slate-400 mt-3 leading-relaxed">Mediante la pasarela Wompi puedes pagar en pesos colombianos con transferencias PSE desde cualquier banco, billeteras Nequi y Daviplata, o tarjetas de crédito/débito Visa y Mastercard.</p>
-                            </details>
-                        </div>
-                    </div>
-                </section>
-            `;
+        function applyFilter(cat) {
+            currentFilter = cat;
+            const user = AuthStore.getUser();
+            document.getElementById('app-container').innerHTML = renderDashboard(user);
+            renderCatalog(user);
         }
 
-        function renderAuth(mode = 'login') {
-            const isLogin = mode === 'login';
+        function createCardHtml(item, isPro, type) {
+            const hasAccess = item.isFree || isPro;
+            const unit = type === 'course' ? `${item.modules.length} Módulos Inmersivos` : `${item.questions.length} Preguntas (Simulador)`;
+            
             return `
-                <div class="min-h-[75vh] flex items-center justify-center px-4 py-12">
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-8 shadow-2xl relative">
-                        <div class="text-center mb-8">
-                            <h2 class="text-2xl font-bold text-white">${isLogin ? 'Bienvenido de nuevo' : 'Crea tu cuenta segura'}</h2>
-                            <p class="text-xs text-slate-400 mt-1">${isLogin ? 'Ingresa tus credenciales para ingresar' : 'Te enviaremos un código OTP de 6 dígitos a tu correo'}</p>
+                <div class="bg-dark-800 border border-dark-700 rounded-2xl p-5 hover:border-brand-500 transition flex flex-col h-full group">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="w-10 h-10 rounded-lg bg-dark-900 flex items-center justify-center text-slate-300 group-hover:text-brand-400 group-hover:bg-brand-900/30 transition">
+                            <i class="fa-solid ${item.icon || 'fa-laptop-code'}"></i>
                         </div>
-                        
-                        <div id="auth-error" class="hidden mb-4 p-3 bg-red-950/70 border border-red-800 text-red-300 text-xs rounded-xl flex items-center gap-2">
-                            <i class="fa-solid fa-circle-exclamation text-red-400"></i>
-                            <span id="auth-error-msg"></span>
-                        </div>
-
-                        <form onsubmit="handleAuthSubmit(event, '${mode}')" class="space-y-4">
-                            ${!isLogin ? `
-                                <div>
-                                    <label class="block text-xs font-medium text-slate-300 mb-1">Nombre Completo</label>
-                                    <input type="text" id="auth-name" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:border-brand-500 focus:outline-none" placeholder="Tu nombre">
-                                </div>
-                            ` : ''}
-                            <div>
-                                <label class="block text-xs font-medium text-slate-300 mb-1">Correo Electrónico</label>
-                                <input type="email" id="auth-email" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:border-brand-500 focus:outline-none" placeholder="tucorreo@dominio.com">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-slate-300 mb-1">Contraseña</label>
-                                <input type="password" id="auth-password" required minlength="6" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:border-brand-500 focus:outline-none" placeholder="••••••••">
-                            </div>
-                            
-                            <button type="submit" id="auth-btn-submit" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-medium py-3 rounded-xl shadow-lg shadow-brand-600/30 transition mt-2 flex items-center justify-center gap-2">
-                                <span>${isLogin ? 'Iniciar Sesión' : 'Enviar Código de Verificación'}</span>
-                                <i class="fa-solid fa-arrow-right text-xs"></i>
-                            </button>
-                        </form>
-
-                        <div class="mt-6 text-center text-xs text-slate-400">
-                            ${isLogin ? '¿Aún no tienes cuenta?' : '¿Ya te habías registrado?'}
-                            <button onclick="router.navigate('auth', '${isLogin ? 'register' : 'login'}')" class="text-brand-400 font-medium ml-1 hover:underline">
-                                ${isLogin ? 'Regístrate aquí' : 'Inicia sesión'}
-                            </button>
-                        </div>
+                        <span class="text-[10px] px-2 py-1 rounded-full font-bold uppercase tracking-wider ${item.isFree ? 'bg-teal-900/40 text-teal-400' : 'bg-amber-900/40 text-amber-400'}">
+                            ${item.isFree ? 'Gratis' : 'Premium'}
+                        </span>
                     </div>
-                </div>
-            `;
-        }
-
-        function renderOtpVerification(email) {
-            return `
-                <div class="min-h-[75vh] flex items-center justify-center px-4 py-12">
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-8 shadow-2xl text-center">
-                        <div class="w-16 h-16 bg-brand-600/20 border border-brand-500/40 rounded-full flex items-center justify-center mx-auto mb-6 text-brand-400 text-2xl">
-                            <i class="fa-solid fa-envelope-circle-check"></i>
-                        </div>
-                        
-                        <h2 class="text-2xl font-bold text-white mb-2">Verifica tu Correo</h2>
-                        <p class="text-xs text-slate-400 mb-6 leading-relaxed">
-                            Hemos enviado un código de 6 dígitos a <strong class="text-white">${email || 'tu correo'}</strong>. Ingrésalo a continuación para activar tu cuenta.
-                        </p>
-
-                        <div id="otp-error" class="hidden mb-4 p-3 bg-red-950/70 border border-red-800 text-red-300 text-xs rounded-xl flex items-center gap-2">
-                            <i class="fa-solid fa-circle-exclamation text-red-400"></i>
-                            <span id="otp-error-msg"></span>
-                        </div>
-
-                        <form onsubmit="handleOtpSubmit(event, '${email}')" class="space-y-6">
-                            <div>
-                                <label class="block text-xs font-semibold text-brand-400 uppercase tracking-wider mb-3">Código de 6 dígitos</label>
-                                <input type="text" id="otp-code" maxlength="6" pattern="[0-9]{6}" required autofocus class="w-full text-center text-2xl font-mono tracking-[0.5em] bg-slate-950 border border-brand-500/50 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-brand-500" placeholder="123456">
-                            </div>
-
-                            <button type="submit" id="otp-btn-submit" class="w-full bg-brand-600 hover:bg-brand-500 text-white font-semibold py-3.5 rounded-xl shadow-lg shadow-brand-600/30 transition flex items-center justify-center gap-2">
-                                <i class="fa-solid fa-shield-check"></i>
-                                <span>Verificar y Entrar</span>
-                            </button>
-                        </form>
-
-                        <div class="mt-6 pt-4 border-t border-slate-800 flex justify-between items-center text-xs">
-                            <button onclick="router.navigate('auth', 'register')" class="text-slate-400 hover:text-white transition">&larr; Cambiar correo</button>
-                            <button onclick="resendOtpCode('${email}')" class="text-brand-400 hover:underline">Reenviar Código</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderDashboard(user) {
-            const email = user.email || 'estudiante@certiprep.ai';
-            const name = (user.user_metadata && user.user_metadata.full_name) ? user.user_metadata.full_name : 'Estudiante';
-            const profile = user.profileData || {};
-            const plan = profile.plan || 'Básico';
-            const lang = profile.lang || 'es';
-
-            return `
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col md:flex-row gap-8">
-                    <!-- SIDEBAR -->
-                    <div class="w-full md:w-64 space-y-2 flex-shrink-0">
-                        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl mb-4 shadow-lg">
-                            <div class="flex items-center space-x-3 mb-2">
-                                <div class="w-10 h-10 rounded-full bg-brand-600 flex items-center justify-center font-bold text-white text-lg">
-                                    ${name.charAt(0).toUpperCase()}
-                                </div>
-                                <div class="overflow-hidden">
-                                    <div class="text-sm font-bold text-white truncate">${name}</div>
-                                    <div class="text-xs text-slate-400 truncate">${email}</div>
-                                </div>
-                            </div>
-                            <div class="mt-3 flex items-center justify-between border-t border-slate-800/80 pt-3">
-                                <span class="text-xs text-slate-400">Plan Actual:</span>
-                                <span class="inline-block px-2.5 py-0.5 bg-brand-500/10 text-brand-400 border border-brand-500/20 text-xs font-semibold rounded-full">${plan}</span>
-                            </div>
-                        </div>
-
-                        <button onclick="switchTab('sim')" id="tab-btn-sim" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl bg-brand-600 text-white text-sm font-medium transition shadow-md">
-                            <i class="fa-solid fa-laptop-code w-5"></i> <span>Simulador IA</span>
-                        </button>
-                        <button onclick="switchTab('settings')" id="tab-btn-settings" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-white text-sm font-medium transition">
-                            <i class="fa-solid fa-gear w-5"></i> <span>Ajustes & Idioma</span>
-                        </button>
-                        <button onclick="handleLogout()" class="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-950/30 text-sm font-medium transition">
-                            <i class="fa-solid fa-right-from-bracket w-5"></i> <span>Cerrar Sesión</span>
-                        </button>
-                    </div>
-
-                    <!-- CONTENIDO DE PESTAÑAS -->
-                    <div class="flex-grow space-y-6">
-                        
-                        <!-- PESTAÑA 1: SIMULADOR DE EXAMEN -->
-                        <div id="tab-sim" class="space-y-6">
-                            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-6 shadow-lg">
-                                <div>
-                                    <span class="text-xs text-brand-400 font-semibold uppercase tracking-wider">Módulo de Práctica</span>
-                                    <h2 class="text-xl font-bold text-white mt-1">AWS Certified Solutions Architect Associate</h2>
-                                    <p class="text-sm text-slate-400 mt-1">Simulación adaptativa con explicaciones de Inteligencia Artificial.</p>
-                                </div>
-                                <div class="bg-slate-950 border border-slate-800 px-5 py-3 rounded-xl text-center sm:text-right">
-                                    <div class="text-xs text-slate-400 mb-0.5">Probabilidad de Aprobar</div>
-                                    <div class="text-2xl font-extrabold text-emerald-400">82%</div>
-                                </div>
-                            </div>
-
-                            <div class="bg-slate-900 border border-slate-800 p-6 sm:p-8 rounded-2xl space-y-6 shadow-lg">
-                                <div class="flex justify-between items-center text-xs text-slate-400 border-b border-slate-800 pb-4">
-                                    <span class="font-mono text-brand-400">Pregunta 14 de 65</span>
-                                    <span class="bg-slate-800 px-2.5 py-1 rounded-full text-slate-300"><i class="fa-solid fa-brain mr-1 text-brand-400"></i> Evaluación Activa</span>
-                                </div>
-
-                                <p id="current-question" class="text-base sm:text-lg text-white font-medium leading-relaxed">
-                                    Una empresa requiere almacenar datos con baja frecuencia de acceso, pero que exigen disponibilidad inmediata al ser consultados. ¿Cuál tipo de almacenamiento Amazon S3 es el más indicado?
-                                </p>
-                                
-                                <div class="space-y-3 pt-2">
-                                    <label class="flex items-center space-x-3 p-4 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-brand-500 cursor-pointer transition">
-                                        <input type="radio" name="q1" value="S3 Standard-IA" class="text-brand-600 focus:ring-brand-500 h-4 w-4">
-                                        <span class="text-sm text-slate-200">Amazon S3 Standard-Infrequent Access (S3 Standard-IA)</span>
-                                    </label>
-                                    <label class="flex items-center space-x-3 p-4 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-brand-500 cursor-pointer transition">
-                                        <input type="radio" name="q1" value="S3 Glacier Flexible Retrieval" class="text-brand-600 focus:ring-brand-500 h-4 w-4">
-                                        <span class="text-sm text-slate-200">Amazon S3 Glacier Flexible Retrieval</span>
-                                    </label>
-                                    <label class="flex items-center space-x-3 p-4 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-brand-500 cursor-pointer transition">
-                                        <input type="radio" name="q1" value="S3 Glacier Deep Archive" class="text-brand-600 focus:ring-brand-500 h-4 w-4">
-                                        <span class="text-sm text-slate-200">Amazon S3 Glacier Deep Archive</span>
-                                    </label>
-                                </div>
-
-                                <div class="pt-4 flex flex-col sm:flex-row items-center gap-4">
-                                    <button onclick="evaluateQuestionWithAI()" class="w-full sm:w-auto bg-brand-600 hover:bg-brand-500 text-white font-medium px-6 py-3 rounded-xl text-sm transition flex items-center justify-center space-x-2 shadow-lg shadow-brand-600/30">
-                                        <i class="fa-solid fa-wand-magic-sparkles"></i> <span>Evaluar Respuesta con IA</span>
-                                    </button>
-                                </div>
-
-                                <div id="ai-response-box" class="hidden p-5 rounded-xl bg-brand-950/50 border border-brand-800/80 text-xs sm:text-sm text-slate-200 leading-relaxed shadow-inner"></div>
-                            </div>
-                        </div>
-
-                        <!-- PESTAÑA 2: AJUSTES E IDIOMA -->
-                        <div id="tab-settings" class="hidden space-y-6">
-                            <div class="bg-slate-900 border border-slate-800 p-6 sm:p-8 rounded-2xl space-y-6 shadow-lg">
-                                <h3 class="text-lg font-bold text-white border-b border-slate-800 pb-4 flex items-center gap-2">
-                                    <i class="fa-solid fa-sliders text-brand-400"></i>
-                                    <span>Configuración del Perfil y Preferencias</span>
-                                </h3>
-
-                                <form onsubmit="handleSaveSettings(event)" class="space-y-6">
-                                    <div>
-                                        <label class="block text-xs font-medium text-slate-300 mb-1">Nombre Completo</label>
-                                        <input type="text" id="setting-name" value="${name}" required class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:border-brand-500 focus:outline-none">
-                                    </div>
-
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                        <div>
-                                            <label class="block text-xs font-medium text-slate-300 mb-2">Idioma Preferido</label>
-                                            <select id="setting-lang" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:border-brand-500 focus:outline-none">
-                                                <option value="es" ${lang === 'es' ? 'selected' : ''}>Español (Latinoamérica)</option>
-                                                <option value="en" ${lang === 'en' ? 'selected' : ''}>English (US)</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label class="block text-xs font-medium text-slate-300 mb-2">Tema de la Interfaz</label>
-                                            <select id="setting-theme" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:border-brand-500 focus:outline-none">
-                                                <option value="dark">Modo Oscuro (SaaS Pro)</option>
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div class="pt-2">
-                                        <label class="flex items-center space-x-3 cursor-pointer">
-                                            <input type="checkbox" id="setting-notifications" checked class="rounded bg-slate-950 border-slate-800 text-brand-600 focus:ring-brand-500 h-4 w-4">
-                                            <span class="text-xs text-slate-300">Recibir recordatorios de estudio y alertas de progreso por correo</span>
-                                        </label>
-                                    </div>
-
-                                    <button type="submit" class="bg-brand-600 hover:bg-brand-500 text-white font-medium px-6 py-3 rounded-xl text-sm transition shadow-lg shadow-brand-600/30">
-                                        Guardar Configuración
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            `;
-        }
-
-        function renderLegal(type) {
-            const isTerms = type === 'terms';
-            return `
-                <div class="max-w-4xl mx-auto px-4 py-16 space-y-8">
-                    <button onclick="router.navigate('landing')" class="text-xs font-semibold text-brand-400 hover:underline mb-4 inline-flex items-center gap-1">
-                        <i class="fa-solid fa-arrow-left"></i> Regresar al Inicio
+                    <span class="text-xs font-semibold text-brand-500 mb-1">${item.cat}</span>
+                    <h3 class="text-lg font-bold text-white mb-2 leading-tight">${item.title}</h3>
+                    <p class="text-xs text-slate-400 mb-6 flex-grow"><i class="fa-solid fa-layer-group mr-1"></i> ${unit}</p>
+                    
+                    <button onclick="openContent('${item.id}', '${type}', ${hasAccess})" class="w-full py-2.5 rounded-xl text-sm font-medium transition ${hasAccess ? 'bg-brand-600 hover:bg-brand-500 text-white shadow-lg shadow-brand-500/20' : 'bg-dark-900 border border-dark-700 text-slate-500 hover:text-slate-300'}">
+                        ${hasAccess ? 'Comenzar Ahora' : '<i class="fa-solid fa-lock mr-2"></i> Desbloquear Pro'}
                     </button>
+                </div>
+            `;
+        }
 
-                    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 sm:p-12 shadow-2xl space-y-6">
-                        <h1 class="text-3xl font-extrabold text-white border-b border-slate-800 pb-4">
-                            ${isTerms ? 'Términos y Condiciones de Uso' : 'Política de Privacidad y Tratamiento de Datos'}
-                        </h1>
+        function openContent(id, type, hasAccess) {
+            if (!hasAccess) return alert("Este contenido requiere una Membresía PRO. Haz clic en 'Pagar Pro' en tu panel izquierdo.");
+            router.navigate(type, id);
+        }
+
+        function renderCourseView(courseId) {
+            const course = coursesDB.find(c => c.id === courseId);
+            const firstModule = course.modules[0];
+            
+            setTimeout(() => {
+                document.getElementById('module-title').innerText = firstModule.title;
+                document.getElementById('module-content').innerHTML = firstModule.content;
+            }, 50);
+
+            const modulesListHtml = course.modules.map((m, idx) => `
+                <button onclick="loadModule('${courseId}', ${idx})" class="w-full text-left p-3 rounded-lg text-sm text-slate-300 hover:bg-dark-700 hover:text-white transition flex items-center gap-3 border border-transparent hover:border-dark-600 mb-2">
+                    <div class="w-6 h-6 rounded-full bg-dark-900 flex items-center justify-center text-xs text-slate-500">${idx+1}</div>
+                    <span class="truncate">${m.title}</span>
+                </button>
+            `).join('');
+
+            return `
+                <div class="flex flex-col h-[calc(100vh-64px)] bg-dark-900">
+                    <div class="h-14 bg-dark-800 border-b border-dark-700 flex items-center px-4 justify-between flex-shrink-0">
+                        <button onclick="router.navigate('dashboard')" class="text-sm font-medium text-slate-400 hover:text-white flex items-center gap-2 transition">
+                            <div class="w-8 h-8 rounded-lg bg-dark-700 flex items-center justify-center"><i class="fa-solid fa-arrow-left"></i></div> Volver al Catálogo
+                        </button>
+                        <h2 class="text-white font-bold truncate px-4">${course.title}</h2>
+                    </div>
+                    
+                    <div class="flex flex-1 overflow-hidden">
+                        <div class="w-80 bg-dark-800 border-r border-dark-700 overflow-y-auto p-4 hidden md:block flex-shrink-0">
+                            <h3 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">Contenido del Curso</h3>
+                            ${modulesListHtml}
+                        </div>
                         
-                        <div class="text-sm text-slate-300 leading-relaxed space-y-4">
-                            ${isTerms ? `
-                                <p><strong>Última actualización: Octubre de 2026</strong></p>
-                                <p>Bienvenido a CertiPrep AI. Al utilizar nuestro sitio web, plataformas de práctica y servicios de preparación interactiva con Inteligencia Artificial, el usuario acepta de forma expresa los siguientes Términos y Condiciones de Servicio.</p>
-                                
-                                <h3 class="text-base font-bold text-white pt-2">1. Objeto y Alcance del Servicio</h3>
-                                <p>CertiPrep AI ofrece un simulador educativo interactivo orientado a exámenes de certificación en áreas de tecnología y gestión de proyectos (incluyendo AWS, PMI y Scrum.org). La plataforma provee herramientas predictivas de estudio pero no emite ni concede certificaciones oficiales directamente.</p>
-
-                                <h3 class="text-base font-bold text-white pt-2">2. Autenticación y Código OTP</h3>
-                                <p>Para garantizar el acceso seguro de cada estudiante, la creación de cuenta requiere la verificación obligatoria mediante un código numérico OTP de 6 dígitos enviado al correo electrónico registrado. El usuario es responsable de mantener la confidencialidad de sus credenciales.</p>
-
-                                <h3 class="text-base font-bold text-white pt-2">3. Pagos y Pasarela Wompi Colombia</h3>
-                                <p>Los pagos son procesados de forma cifrada mediante nuestro aliado comercial Wompi. Aceptamos transferencias PSE, Nequi, Daviplata y tarjetas. Conforme con la Ley 1480 de 2011 (Estatuto del Consumidor en Colombia), el usuario dispone del derecho de retracto en un plazo máximo de cinco (5) días hábiles tras la compra siempre que no haya realizado el uso completo del paquete de simulaciones.</p>
-                            ` : `
-                                <p><strong>Última actualización: Octubre de 2026</strong></p>
-                                <p>En estricto cumplimiento de la Ley Estatutaria 1581 de 2012 y el Decreto 1377 de 2013 de la República de Colombia, CertiPrep AI expone su Política de Protección y Tratamiento de Datos Personales.</p>
-
-                                <h3 class="text-base font-bold text-white pt-2">1. Información Recolectada</h3>
-                                <p>Recolectamos información básica necesaria para brindar el servicio: Nombre completo, correo electrónico, registro de respuestas en simuladores de estudio e historial de transacciones emitido por la pasarela Wompi.</p>
-
-                                <h3 class="text-base font-bold text-white pt-2">2. Uso de la Información</h3>
-                                <p>Sus datos personales son utilizados exclusivamente para: generar métricas adaptativas de estudio con Inteligencia Artificial, enviar códigos de verificación OTP, procesar suscripciones activas y enviar notificaciones relativas a su avance.</p>
-
-                                <h3 class="text-base font-bold text-white pt-2">3. Derechos del Titular (Habeas Data)</h3>
-                                <p>Como titular de los datos, tiene derecho a conocer, actualizar, rectificar y solicitar la supresión de sus datos de nuestras bases de datos enviando un correo electrónico a nuestro equipo directivo: <strong class="text-brand-400">soporte@certiprep.ai</strong>.</p>
-                            `}
+                        <div class="flex-1 overflow-y-auto scroll-smooth bg-dark-900">
+                            <div class="max-w-4xl mx-auto p-6 md:p-12">
+                                <h1 id="module-title" class="text-3xl md:text-5xl font-extrabold text-white mb-10 pb-6 border-b border-dark-800 font-serif leading-tight">Cargando módulo...</h1>
+                                <div id="module-content" class="pb-20"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
             `;
         }
 
-        async function handleAuthSubmit(e, mode) {
+        window.loadModule = function(cId, mIdx) {
+            const course = coursesDB.find(c => c.id === cId);
+            const mod = course.modules[mIdx];
+            document.getElementById('module-title').innerText = mod.title;
+            document.getElementById('module-content').innerHTML = mod.content;
+            document.querySelector('.flex-1.overflow-y-auto').scrollTo(0, 0);
+        };
+
+        let currentSimState = { data: null, qIndex: 0, score: 0 };
+        function renderSimulatorView(simId) {
+            const sim = simulatorsDB.find(s => s.id === simId);
+            currentSimState = { data: sim, qIndex: 0, score: 0 };
+            
+            setTimeout(() => loadQuestion(), 50);
+
+            return `
+                <div class="max-w-4xl mx-auto px-4 py-8">
+                    <button onclick="router.navigate('dashboard')" class="text-sm font-medium text-slate-400 hover:text-white flex items-center gap-2 mb-6 transition">
+                        <i class="fa-solid fa-arrow-left"></i> Abandonar Simulador
+                    </button>
+                    
+                    <div class="bg-dark-800 border border-dark-700 rounded-2xl p-8 shadow-2xl relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-full h-1 bg-dark-700">
+                            <div id="sim-progress" class="h-full bg-brand-500 w-0 transition-all duration-300"></div>
+                        </div>
+                        
+                        <div class="flex justify-between items-center mb-8 border-b border-dark-700 pb-4">
+                            <h2 class="text-xl font-bold text-white">${sim.title}</h2>
+                            <span id="sim-counter" class="text-brand-400 font-mono text-sm bg-brand-900/30 px-3 py-1 rounded-full"></span>
+                        </div>
+
+                        <div id="sim-question-container"></div>
+                        
+                        <div id="sim-hint-box" class="hidden mt-6 p-4 bg-amber-900/20 border border-amber-800/50 rounded-xl text-amber-200 text-sm"></div>
+
+                        <div class="mt-8 flex justify-between items-center pt-6 border-t border-dark-700">
+                            <button onclick="showHint()" class="text-slate-400 hover:text-amber-400 text-sm font-medium transition flex items-center gap-2">
+                                <i class="fa-solid fa-robot"></i> Pedir Pista IA
+                            </button>
+                            <button id="sim-next-btn" onclick="nextQuestion()" class="bg-brand-600 hover:bg-brand-500 text-white font-medium px-6 py-2.5 rounded-xl transition shadow-lg hidden">
+                                Siguiente <i class="fa-solid fa-arrow-right ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        window.loadQuestion = function() {
+            const { data, qIndex } = currentSimState;
+            const q = data.questions[qIndex];
+            
+            document.getElementById('sim-counter').innerText = `Pregunta ${qIndex + 1} / ${data.questions.length}`;
+            document.getElementById('sim-progress').style.width = `${((qIndex) / data.questions.length) * 100}%`;
+            document.getElementById('sim-hint-box').classList.add('hidden');
+            document.getElementById('sim-next-btn').classList.add('hidden');
+
+            let optionsHtml = q.options.map((opt, idx) => `
+                <button onclick="selectOption(${idx})" id="opt-${idx}" class="w-full text-left p-4 rounded-xl border border-dark-600 bg-dark-900 hover:border-brand-500 transition mb-3 text-slate-200">
+                    <span class="inline-block w-6 text-brand-500 font-bold">${String.fromCharCode(65 + idx)}.</span> ${opt}
+                </button>
+            `).join('');
+
+            document.getElementById('sim-question-container').innerHTML = `
+                <h3 class="text-lg md:text-xl font-medium text-white mb-6 leading-relaxed">${q.q}</h3>
+                <div>${optionsHtml}</div>
+            `;
+        };
+
+        window.selectOption = function(idx) {
+            const { data, qIndex } = currentSimState;
+            const q = data.questions[qIndex];
+            const isCorrect = idx === q.answer;
+            
+            if(isCorrect) currentSimState.score++;
+            
+            q.options.forEach((_, i) => {
+                const btn = document.getElementById(`opt-${i}`);
+                btn.disabled = true;
+                if(i === q.answer) {
+                    btn.className = "w-full text-left p-4 rounded-xl border border-teal-500 bg-teal-900/30 text-white font-bold mb-3";
+                } else if(i === idx && !isCorrect) {
+                    btn.className = "w-full text-left p-4 rounded-xl border border-red-500 bg-red-900/30 text-white mb-3 line-through opacity-70";
+                } else {
+                    btn.className = "w-full text-left p-4 rounded-xl border border-dark-700 bg-dark-900 text-slate-500 mb-3 opacity-50";
+                }
+            });
+
+            document.getElementById('sim-next-btn').classList.remove('hidden');
+            
+            const hintBox = document.getElementById('sim-hint-box');
+            hintBox.innerHTML = `<strong>Análisis de la IA:</strong> ${isCorrect ? '¡Excelente deducción! ' : 'Incorrecto. '}${q.hint}`;
+            hintBox.className = `mt-6 p-4 border rounded-xl text-sm ${isCorrect ? 'bg-teal-900/20 border-teal-800 text-teal-200' : 'bg-red-900/20 border-red-800 text-red-200'}`;
+            hintBox.classList.remove('hidden');
+        };
+
+        window.showHint = function() {
+            const q = currentSimState.data.questions[currentSimState.qIndex];
+            const hintBox = document.getElementById('sim-hint-box');
+            hintBox.innerHTML = `<strong>Pista IA:</strong> Piensa en esto: ${q.hint}`;
+            hintBox.className = 'mt-6 p-4 bg-amber-900/20 border border-amber-800/50 rounded-xl text-amber-200 text-sm';
+            hintBox.classList.remove('hidden');
+        };
+
+        window.nextQuestion = function() {
+            currentSimState.qIndex++;
+            if (currentSimState.qIndex < currentSimState.data.questions.length) {
+                loadQuestion();
+            } else {
+                const percent = Math.round((currentSimState.score / currentSimState.data.questions.length) * 100);
+                document.getElementById('sim-question-container').innerHTML = `
+                    <div class="text-center py-12">
+                        <div class="w-24 h-24 rounded-full mx-auto flex items-center justify-center text-3xl font-bold mb-4 ${percent >= 70 ? 'bg-teal-900 text-teal-400 border-4 border-teal-500' : 'bg-red-900 text-red-400 border-4 border-red-500'}">
+                            ${percent}%
+                        </div>
+                        <h3 class="text-2xl font-bold text-white mb-2">Simulacro Finalizado</h3>
+                        <p class="text-slate-400 mb-8">Respondiste correctamente ${currentSimState.score} de ${currentSimState.data.questions.length} preguntas.</p>
+                        <button onclick="router.navigate('dashboard')" class="bg-dark-700 hover:bg-dark-600 text-white px-6 py-2.5 rounded-xl transition">Volver al Panel</button>
+                    </div>
+                `;
+                document.getElementById('sim-next-btn').style.display = 'none';
+                document.getElementById('sim-hint-box').style.display = 'none';
+                document.getElementById('sim-progress').style.width = '100%';
+            }
+        };
+
+        function renderAdmin(user) {
+            const payments = AuthStore.getPayments();
+            const totalRevenue = payments.reduce((acc, curr) => acc + curr.amount, 0);
+            const usersDb = AuthStore.getUsersDb();
+            
+            const userRows = usersDb.map(u => `
+                <tr class="border-b border-dark-700 hover:bg-dark-800/50 transition">
+                    <td class="p-4 flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-brand-600 flex items-center justify-center overflow-hidden font-bold text-white text-xs">
+                            ${u.avatar ? `<img src="${u.avatar}" class="w-full h-full object-cover">` : u.name.charAt(0).toUpperCase()}
+                        </div>
+                        <span class="text-white font-medium">${u.name}</span>
+                    </td>
+                    <td class="p-4 text-slate-300">${u.email}</td>
+                    <td class="p-4"><span class="px-2 py-1 rounded-full text-xs font-bold ${u.plan === 'Pro' || u.plan.includes('Pro') ? 'bg-amber-500/20 text-amber-400' : 'bg-dark-700 text-slate-300'}">${u.plan}</span></td>
+                    <td class="p-4 text-slate-400 font-mono text-xs">${u.registeredAt || '2026-10-01 12:00'}</td>
+                    <td class="p-4 text-slate-400 font-mono text-xs">${u.lastLogin || 'Reciente'}</td>
+                </tr>
+            `).join('');
+
+            const payRows = payments.length > 0 ? payments.map(p => `
+                <tr class="border-b border-dark-700 hover:bg-dark-800/50 transition">
+                    <td class="p-4 text-slate-300 font-mono text-xs">${p.date}</td>
+                    <td class="p-4 text-white font-medium">${p.userEmail}</td>
+                    <td class="p-4 text-emerald-400 font-bold">$${p.amount.toLocaleString()} COP</td>
+                    <td class="p-4"><span class="px-2 py-1 bg-emerald-900/30 text-emerald-400 text-[10px] rounded-full uppercase border border-emerald-800">Aprobado</span></td>
+                    <td class="p-4 text-slate-500 font-mono text-xs">${p.txId}</td>
+                </tr>
+            `).join('') : `<tr><td colspan="5" class="p-8 text-center text-slate-500">No hay pagos registrados aún.</td></tr>`;
+
+            return `
+                <div class="max-w-7xl mx-auto px-4 py-12 space-y-8">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h2 class="text-3xl font-extrabold text-white">Panel de Administración General</h2>
+                            <p class="text-slate-400 mt-1">Gestión de base de datos de usuarios (Supabase DB) y finanzas.</p>
+                        </div>
+                        <button onclick="handleLogout()" class="bg-dark-800 hover:bg-dark-700 text-white px-4 py-2 rounded-lg transition border border-dark-600">Cerrar Sesión</button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-dark-800 border border-dark-700 p-6 rounded-2xl">
+                            <div class="text-slate-400 text-sm mb-1">Ingresos Totales (COP)</div>
+                            <div class="text-3xl font-bold text-emerald-400">$${totalRevenue.toLocaleString()}</div>
+                        </div>
+                        <div class="bg-dark-800 border border-dark-700 p-6 rounded-2xl">
+                            <div class="text-slate-400 text-sm mb-1">Membresías Vendidas</div>
+                            <div class="text-3xl font-bold text-white">${payments.length}</div>
+                        </div>
+                        <div class="bg-dark-800 border border-dark-700 p-6 rounded-2xl">
+                            <div class="text-slate-400 text-sm mb-1">Usuarios Registrados</div>
+                            <div class="text-3xl font-bold text-brand-400">${usersDb.length}</div>
+                        </div>
+                    </div>
+
+                    <!-- TABLA SUPABASE USERS -->
+                    <div class="bg-dark-800 border border-dark-700 rounded-2xl overflow-hidden shadow-2xl">
+                        <div class="p-6 border-b border-dark-700 bg-dark-900/50 flex justify-between items-center">
+                            <h3 class="font-bold text-white text-lg"><i class="fa-solid fa-database text-brand-500 mr-2"></i> public.users (Base de Datos de Estudiantes)</h3>
+                            <span class="text-xs font-mono text-slate-400 bg-dark-900 px-3 py-1 rounded-full border border-dark-700">Conectado a PostgreSQL</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-dark-900 text-slate-400 uppercase text-xs tracking-wider">
+                                    <tr>
+                                        <th class="p-4 font-medium">Usuario</th>
+                                        <th class="p-4 font-medium">Correo</th>
+                                        <th class="p-4 font-medium">Plan</th>
+                                        <th class="p-4 font-medium">Fecha de Registro</th>
+                                        <th class="p-4 font-medium">Último Inicio de Sesión</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${userRows}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- TABLA TRANSACCIONES -->
+                    <div class="bg-dark-800 border border-dark-700 rounded-2xl overflow-hidden shadow-2xl">
+                        <div class="p-6 border-b border-dark-700 bg-dark-900/50">
+                            <h3 class="font-bold text-white text-lg"><i class="fa-solid fa-credit-card text-emerald-400 mr-2"></i> Historial de Transacciones (Wompi)</h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-dark-900 text-slate-400 uppercase text-xs tracking-wider">
+                                    <tr>
+                                        <th class="p-4 font-medium">Fecha</th>
+                                        <th class="p-4 font-medium">Estudiante</th>
+                                        <th class="p-4 font-medium">Monto</th>
+                                        <th class="p-4 font-medium">Estado</th>
+                                        <th class="p-4 font-medium">ID Transacción</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${payRows}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function handleAuth(e, mode) {
             e.preventDefault();
             const email = document.getElementById('auth-email').value.trim();
             const password = document.getElementById('auth-password').value;
-            const nameInput = document.getElementById('auth-name');
-            const fullName = nameInput ? nameInput.value.trim() : 'Estudiante';
-            const errBox = document.getElementById('auth-error');
-            const errBoxMsg = document.getElementById('auth-error-msg');
+            const alertBox = document.getElementById('auth-alert');
             
-            errBox.classList.add('hidden');
-
             try {
                 if (mode === 'register') {
-                    await BackendStore.register(email, password, fullName);
-                    showNotification('Código de verificación OTP enviado a tu correo.', 'success');
-                    router.navigate('verify-otp', email);
+                    const name = document.getElementById('auth-name').value.trim();
+                    if(email === 'admin@certiprep.ai') throw new Error("Correo reservado.");
+                    
+                    let userDb = JSON.parse(localStorage.getItem('certiprep_users_db')) || [];
+                    if(userDb.find(u => u.email === email)) throw new Error("El correo ya está registrado.");
+                    
+                    const newUserRecord = { 
+                        name, 
+                        email, 
+                        password, 
+                        plan: 'Básico', 
+                        role: 'student',
+                        registeredAt: new Date().toLocaleString('es-CO'),
+                        lastLogin: new Date().toLocaleString('es-CO'),
+                        avatar: ''
+                    };
+                    
+                    userDb.push(newUserRecord);
+                    localStorage.setItem('certiprep_users_db', JSON.stringify(userDb));
+                    
+                    alertBox.innerText = "¡Cuenta creada con éxito! Ahora inicia sesión.";
+                    alertBox.className = "mb-4 p-3 rounded-lg text-sm font-medium bg-teal-900/30 border border-teal-800 text-teal-300";
+                    alertBox.classList.remove('hidden');
+                    
+                    setTimeout(() => router.navigate('auth', 'login'), 2000);
                 } else {
-                    await BackendStore.login(email, password);
-                    showNotification('¡Sesión iniciada con éxito!', 'success');
+                    if (email === 'admin@certiprep.ai' && password === 'admin123') {
+                        const adminUser = { email: 'admin@certiprep.ai', name: 'Administrador', role: 'admin' };
+                        AuthStore.setUser(adminUser);
+                        return router.navigate('admin');
+                    }
+                    
+                    let userDb = JSON.parse(localStorage.getItem('certiprep_users_db')) || [];
+                    const found = userDb.find(u => u.email === email && u.password === password);
+                    if (!found) throw new Error("Credenciales incorrectas.");
+                    
+                    // Actualizar último login en la base de datos
+                    AuthStore.updateUserDb(email, { lastLogin: new Date().toLocaleString('es-CO') });
+                    
+                    AuthStore.setUser(found);
                     router.navigate('dashboard');
                 }
-            } catch (err) {
-                if (err.message === 'NEEDS_VERIFICATION') {
-                    showNotification('Tu cuenta requiere verificación OTP. Revisa tu correo.', 'warning');
-                    router.navigate('verify-otp', email);
-                    return;
-                }
-                errBoxMsg.innerText = err.message || 'Error de autenticación. Verifica tus datos.';
-                errBox.classList.remove('hidden');
+            } catch(error) {
+                alertBox.innerText = error.message;
+                alertBox.className = "mb-4 p-3 rounded-lg text-sm font-medium bg-red-900/30 border border-red-800 text-red-300";
+                alertBox.classList.remove('hidden');
             }
         }
 
-        async function handleOtpSubmit(e, email) {
-            e.preventDefault();
-            const codeInput = document.getElementById('otp-code');
-            const token = codeInput.value.trim();
-            const errBox = document.getElementById('otp-error');
-            const errBoxMsg = document.getElementById('otp-error-msg');
-
-            errBox.classList.add('hidden');
-
-            try {
-                await BackendStore.verifyOtp(email, token);
-                showNotification('¡Cuenta verificada con éxito!', 'success');
-                router.navigate('dashboard');
-            } catch (err) {
-                errBoxMsg.innerText = err.message || 'Código incorrecto. Ingresa el número de 6 dígitos.';
-                errBox.classList.remove('hidden');
-            }
-        }
-
-        async function resendOtpCode(email) {
-            showNotification(`Reenviando código OTP a ${email}...`, 'info');
-            setTimeout(() => {
-                showNotification(`Nuevo código enviado. Revisa tu bandeja de entrada o spam.`, 'success');
-            }, 1000);
-        }
-
-        async function handleSaveSettings(e) {
-            e.preventDefault();
-            const name = document.getElementById('setting-name').value;
-            const lang = document.getElementById('setting-lang').value;
-            const notifs = document.getElementById('setting-notifications').checked;
-
-            const user = await BackendStore.getSessionUser();
-            if (user && supabaseClient) {
-                await supabaseClient.from('profiles').upsert({
-                    id: user.id,
-                    full_name: name,
-                    lang: lang,
-                    notifications: notifs
-                });
-            } else if (user) {
-                user.user_metadata = user.user_metadata || {};
-                user.user_metadata.full_name = name;
-                user.profileData = user.profileData || {};
-                user.profileData.lang = lang;
-                user.profileData.notifications = notifs;
-                localStorage.setItem('certiprep_verified_user', JSON.stringify(user));
-            }
-
-            showNotification('Ajustes guardados correctamente.', 'success');
-        }
-
-        async function handleLogout() {
-            await BackendStore.logout();
-            showNotification('Has cerrado la sesión.', 'info');
+        function handleLogout() {
+            AuthStore.logout();
             router.navigate('landing');
         }
 
-        function switchTab(tab) {
-            const tabSim = document.getElementById('tab-sim');
-            const tabSettings = document.getElementById('tab-settings');
-            const btnSim = document.getElementById('tab-btn-sim');
-            const btnSettings = document.getElementById('tab-btn-settings');
-
-            if (tab === 'sim') {
-                tabSim.classList.remove('hidden');
-                tabSettings.classList.add('hidden');
-                btnSim.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl bg-brand-600 text-white text-sm font-medium transition shadow-md";
-                btnSettings.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-white text-sm font-medium transition";
-            } else {
-                tabSim.classList.add('hidden');
-                tabSettings.classList.remove('hidden');
-                btnSettings.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl bg-brand-600 text-white text-sm font-medium transition shadow-md";
-                btnSim.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-900 hover:text-white text-sm font-medium transition";
-            }
+        function simulateWompiPayment() {
+            const modalHtml = `
+                <div id="wompi-modal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-[fadeIn_0.3s_ease-out]">
+                    <div class="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
+                        <div class="bg-[#002B5E] p-4 text-white flex justify-between items-center">
+                            <div class="font-bold text-lg tracking-wider">Wompi.</div>
+                            <div class="text-sm font-medium opacity-80">Modo Pruebas</div>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold text-slate-800 mb-1">Membresía PRO Ilimitada</h3>
+                            <p class="text-slate-500 text-sm mb-6">CertiPrep AI S.A.S</p>
+                            
+                            <div class="bg-slate-100 rounded-xl p-4 flex justify-between items-center mb-6">
+                                <span class="text-slate-600 font-medium">Total a pagar</span>
+                                <span class="text-2xl font-black text-slate-900">$116.000 COP</span>
+                            </div>
+                            
+                            <p class="text-xs text-slate-500 mb-4 text-center">Haz clic en aprobar para activar tu membresía.</p>
+                            
+                            <button onclick="processWompiSuccess()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-emerald-500/30 transition transform hover:-translate-y-1 mb-3">
+                                Aprobar Pago de Prueba ($116.000)
+                            </button>
+                            <button onclick="document.getElementById('wompi-modal').remove()" class="w-full bg-transparent text-slate-500 hover:text-slate-700 font-medium py-2 transition">
+                                Cancelar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
         }
 
-        async function evaluateQuestionWithAI() {
-            const selected = document.querySelector('input[name="q1"]:checked');
-            const responseBox = document.getElementById('ai-response-box');
-
-            if (!selected) {
-                showNotification('Selecciona una opción antes de solicitar la evaluación.', 'warning');
-                return;
-            }
-
-            responseBox.innerHTML = '<i class="fa-solid fa-spinner animate-spin mr-2"></i> Generando explicación adaptativa con Inteligencia Artificial...';
-            responseBox.classList.remove('hidden');
-
-            setTimeout(() => {
-                if (selected.value.includes('Standard-IA')) {
-                    responseBox.innerHTML = `<span class="text-emerald-400 font-bold"><i class="fa-solid fa-circle-check"></i> ¡Respuesta Correcta!</span><br><br><strong>Explicación del Tutor IA:</strong> S3 Standard-IA es el tipo de almacenamiento diseñado para datos de acceso poco frecuente pero que requieren disponibilidad inmediata al ser requeridos. Glacier genera demoras de recuperación de minutos a horas.`;
-                } else {
-                    responseBox.innerHTML = `<span class="text-red-400 font-bold"><i class="fa-solid fa-circle-xmark"></i> Respuesta Incorrecta</span><br><br><strong>Explicación del Tutor IA:</strong> Amazon Glacier está optimizado para almacenamiento de archivo a largo plazo con tiempos de recuperación de minutos u horas. Al requerirse "disponibilidad inmediata", el servicio correcto es S3 Standard-IA.`;
-                }
-            }, 800);
-        }
-
-        function payWithWompi(amountInCents, productName) {
-            if (!WOMPI_PUBLIC_KEY || WOMPI_PUBLIC_KEY.includes('tu_llave')) {
-                showNotification('Modo simulación de pago activo.', 'warning');
-                return;
-            }
-
-            if (!window.WidgetCheckout) {
-                showNotification('Error al iniciar la pasarela Wompi. Verifica tu conexión a internet.', 'error');
-                return;
-            }
-
-            var checkout = new WidgetCheckout({
-                currency: 'COP',
-                amountInCents: amountInCents,
-                reference: 'CERTIPREP-' + Date.now(),
-                publicKey: WOMPI_PUBLIC_KEY,
-                redirectUrl: window.location.href
-            });
-
-            checkout.open(async function (result) {
-                var transaction = result.transaction;
-                if(transaction && transaction.status === 'APPROVED') {
-                    showNotification('¡Pago aprobado correctamente a través de Wompi!', 'success');
-                    
-                    const user = await BackendStore.getSessionUser();
-                    if (user && supabaseClient) {
-                        await supabaseClient
-                            .from('profiles')
-                            .update({ plan: 'Pro 30 Días' })
-                            .eq('id', user.id);
-                    }
-                    router.navigate('dashboard');
-                }
-            });
-        }
-
-        window.addEventListener('DOMContentLoaded', async () => {
-            const user = await BackendStore.getSessionUser();
-            if (user && user.isVerified) {
+        function processWompiSuccess() {
+            document.getElementById('wompi-modal').remove();
+            try {
+                const currentUser = AuthStore.getUser();
+                currentUser.plan = 'Pro';
+                AuthStore.setUser(currentUser);
+                
+                AuthStore.updateUserDb(currentUser.email, { plan: 'Pro' });
+                
+                const tx = {
+                    date: new Date().toLocaleString('es-CO'),
+                    userEmail: currentUser.email,
+                    amount: 116000,
+                    txId: 'TX-WP-' + Math.floor(Math.random() * 1000000000)
+                };
+                AuthStore.addPayment(tx);
+                
+                alert("¡Transacción Aprobada! Tu membresía PRO ha sido activada.");
                 router.navigate('dashboard');
-            } else {
-                router.navigate('landing');
+                
+            } catch(e) {
+                alert("Ocurrió un error al procesar tu pago.");
             }
+        }
+
+        const style = document.createElement('style');
+        style.innerHTML = `@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }`;
+        document.head.appendChild(style);
+
+        window.addEventListener('DOMContentLoaded', () => {
+            router.navigate('landing');
         });
     </script>
 </body>
