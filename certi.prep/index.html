@@ -16,6 +16,8 @@
     <!-- Wompi Oficial para pasarela de pagos en Colombia -->
     <script src="https://checkout.wompi.co/widget.js"></script>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
     <!-- Configuración extendida de Tailwind -->
     <script>
         tailwind.config = {
@@ -868,53 +870,71 @@ async function handleAuth(e, mode) {
         showNotification(err.message, "error");
     }
 }
-        /**
-
 
 /**
- * Pasarela de Pagos Oficial Wompi (Modo directo sin firma)
+ * Generador de Firma con CryptoJS (Funciona perfecto en file:/// y cualquier dominio)
  */
-async function payWithWompi(amountInCents, productName) {
+function generateWompiSignature(reference, amountInCents, currency, integritySecret) {
+    const exactAmount = parseInt(amountInCents, 10);
+    const concatenated = `${reference}${exactAmount}${currency}${integritySecret}`;
+    
+    // CryptoJS calcula el hash SHA-256 de manera exacta sin importar el navegador o entorno
+    const hashHex = CryptoJS.SHA256(concatenated).toString();
+    
+    console.log("Firma generada exitosamente:", hashHex);
+    return hashHex;
+}
+
+/**
+ * Pasarela de Pagos Wompi Oficial
+ */
+function payWithWompi(amountInCents, productName) {
     const WOMPI_PUBLIC_KEY = 'pub_test_yeASV07aXBT4X1uM1LJUXqe1YfXDSKum'; 
+    const INTEGRITY_SECRET = 'test_integrity_hvFeL7nBRdOIBUjQzNO9Hs9zJwdEzyRi'; 
     const currency = 'COP';
+    const exactAmount = parseInt(amountInCents, 10);
     const referenceTx = 'CERTIPREP-' + Date.now();
     
-    if (typeof WidgetCheckout === 'undefined') {
-        showNotification("La librería de Wompi no se ha cargado. Verifica tu conexión o bloqueadores.", "error");
+    // Verificamos que ambas librerías estén cargadas
+    if (typeof WidgetCheckout === 'undefined' || typeof CryptoJS === 'undefined') {
+        showNotification("Faltan librerías. Revisa tu conexión a internet.", "error");
         return;
     }
 
     try {
-        const exactAmount = parseInt(amountInCents, 10);
+        // Generamos la firma de manera síncrona y segura
+        const signatureHash = generateWompiSignature(referenceTx, exactAmount, currency, INTEGRITY_SECRET);
 
         let currentUrl = window.location.href;
         if (!currentUrl.startsWith('http://') && !currentUrl.startsWith('https://')) {
-            currentUrl = 'https://checkout.wompi.co';
+            currentUrl = 'https://checkout.wompi.co'; // URL de rescate para file:///
         }
 
-        // Se inicializa el widget limpiamente sin el parámetro 'signature'
+        // Abrimos el widget enviando la firma correcta
         var checkout = new WidgetCheckout({
             currency: currency,
             amountInCents: exactAmount, 
             reference: referenceTx,
             publicKey: WOMPI_PUBLIC_KEY,
+            signature: {
+                integrity: signatureHash
+            },
             redirectUrl: currentUrl 
         });
 
         checkout.open(function (result) {
             var transaction = result.transaction;
-            
             if (transaction && transaction.status === 'APPROVED') {
                 handleSuccessfulPayment(transaction.id, exactAmount);
             } else if (transaction && transaction.status === 'DECLINED') {
-                showNotification("La transacción fue declinada por tu entidad bancaria.", "error");
+                showNotification("La transacción fue declinada.", "error");
             } else if (transaction && transaction.status === 'ERROR') {
-                showNotification("Ocurrió un error en la pasarela de pagos.", "error");
+                showNotification("Ocurrió un error en la pasarela.", "error");
             }
         });
     } catch (err) {
-        console.error("Error al abrir Wompi:", err);
-        showNotification("Error Wompi: " + (err.message || err), "error");
+        console.error("Error Wompi:", err);
+        showNotification("Error Wompi: " + err.message, "error");
     }
 }
         // Ejecutar después de un pago validado
