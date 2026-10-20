@@ -869,11 +869,15 @@ async function handleAuth(e, mode) {
     }
 }
         /**
+         * 
 /**
- * Función auxiliar para calcular el hash SHA-256 requerido por Wompi
+ * Generador oficial de Firma de Integridad para Wompi Colombia (SHA-256)
+ * Orden obligatorio: referencia + montoEnCentavos + moneda + secretoIntegridad
  */
 async function generateWompiSignature(reference, amountInCents, currency, integritySecret) {
     const concatenated = `${reference}${amountInCents}${currency}${integritySecret}`;
+    console.log("Cadena exacta para Wompi:", concatenated); // Para depurar en F12 si lo necesitas
+    
     const encoder = new TextEncoder();
     const data = encoder.encode(concatenated);
     const hashBuffer = await crypto.subtle.digest('SHA-256', data);
@@ -882,14 +886,16 @@ async function generateWompiSignature(reference, amountInCents, currency, integr
 }
 
 /**
- * Pasarela de Pagos Oficial Wompi (Con firma de integridad incluida)
+ * Pasarela de Pagos Oficial Wompi con Firma Segura Integrada
  */
 async function payWithWompi(amountInCents, productName) {
-    // 1. Tus credenciales de la imagen (Llave pública de prueba y Secreto de Integridad de prueba)
+    // Tus credenciales de pruebas exactas de Wompi
     const WOMPI_PUBLIC_KEY = 'pub_test_yeASV07aXBT4X1uM1LJUXqe1YfXDSKum'; 
-    const INTEGRITY_SECRET = 'test_integrity_hvFeL7nBRdOIBUjQzNO9Hs9zJwdEzyRi'; // El secreto que no te dejaba borrar
+    const INTEGRITY_SECRET = 'test_integrity_hvFeL7nBRdOIBUjQzNO9Hs9zJwdEzyRi'; 
     const currency = 'COP';
-    const referenceTx = 'CERTIPREP-TX-' + Date.now();
+    
+    // Generar una referencia única limpia y fija para esta transacción
+    const referenceTx = 'CERTIPREP-' + Date.now();
     
     if (typeof WidgetCheckout === 'undefined') {
         showNotification("La librería de Wompi no se ha cargado. Verifica tu conexión o bloqueadores.", "error");
@@ -897,7 +903,7 @@ async function payWithWompi(amountInCents, productName) {
     }
 
     try {
-        // 2. Generar la firma de integridad criptográfica automáticamente en el navegador
+        // Calcular la firma criptográfica con el orden correcto exigido por Wompi
         const signatureHash = await generateWompiSignature(referenceTx, amountInCents, currency, INTEGRITY_SECRET);
 
         let currentUrl = window.location.href;
@@ -905,7 +911,7 @@ async function payWithWompi(amountInCents, productName) {
             currentUrl = 'https://checkout.wompi.co';
         }
 
-        // 3. Configurar el widget enviando la firma requerida
+        // Inicializar el widget con la firma de integridad adjunta
         var checkout = new WidgetCheckout({
             currency: currency,
             amountInCents: amountInCents, 
