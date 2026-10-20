@@ -14,7 +14,8 @@
     <!-- Supabase para la base de datos y autenticación -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <!-- Wompi Oficial para pasarela de pagos en Colombia -->
-    <script src="https://checkout.wompi.co/widget.js"></script>
+   <!-- Reemplaza la línea de Wompi actual por esta: -->
+<script src="https://checkout.wompi.co/widget.js?v=2"></script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
@@ -886,7 +887,7 @@ function generateWompiSignature(reference, amountInCents, currency, integritySec
 }
 
 /**
- * Pasarela de Pagos Wompi Oficial
+ * Pasarela de Pagos Wompi Oficial (Con inyección estricta de firma)
  */
 function payWithWompi(amountInCents, productName) {
     const WOMPI_PUBLIC_KEY = 'pub_test_yeASV07aXBT4X1uM1LJUXqe1YfXDSKum'; 
@@ -895,32 +896,35 @@ function payWithWompi(amountInCents, productName) {
     const exactAmount = parseInt(amountInCents, 10);
     const referenceTx = 'CERTIPREP-' + Date.now();
     
-    // Verificamos que ambas librerías estén cargadas
     if (typeof WidgetCheckout === 'undefined' || typeof CryptoJS === 'undefined') {
         showNotification("Faltan librerías. Revisa tu conexión a internet.", "error");
         return;
     }
 
     try {
-        // Generamos la firma de manera síncrona y segura
-        const signatureHash = generateWompiSignature(referenceTx, exactAmount, currency, INTEGRITY_SECRET);
+        const hashHex = generateWompiSignature(referenceTx, exactAmount, currency, INTEGRITY_SECRET);
 
         let currentUrl = window.location.href;
         if (!currentUrl.startsWith('http://') && !currentUrl.startsWith('https://')) {
-            currentUrl = 'https://checkout.wompi.co'; // URL de rescate para file:///
+            currentUrl = 'https://certiprep.ai'; // Wompi exige una URL segura de rescate
         }
 
-        // Abrimos el widget enviando la firma correcta
-        var checkout = new WidgetCheckout({
+        // 1. Objeto de configuración estricto para evitar que el widget borre propiedades
+        const wompiConfig = {
             currency: currency,
             amountInCents: exactAmount, 
             reference: referenceTx,
             publicKey: WOMPI_PUBLIC_KEY,
+            redirectUrl: currentUrl,
             signature: {
-                integrity: signatureHash
-            },
-            redirectUrl: currentUrl 
-        });
+                integrity: String(hashHex) // Forzado a String puro
+            }
+        };
+
+        console.log("Objeto enviado a Wompi:", wompiConfig);
+
+        // 2. Abrimos el widget modal
+        var checkout = new WidgetCheckout(wompiConfig);
 
         checkout.open(function (result) {
             var transaction = result.transaction;
