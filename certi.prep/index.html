@@ -868,30 +868,14 @@ async function handleAuth(e, mode) {
         showNotification(err.message, "error");
     }
 }
-/**
- * Generador robusto de Firma de Integridad para Wompi Colombia (SHA-256)
- * Se asegura de que el monto sea un entero estricto sin decimales.
- */
-async function generateWompiSignature(reference, amountInCents, currency, integritySecret) {
-    // Forzar que el monto sea un número entero exacto
-    const cleanAmount = parseInt(amountInCents, 10);
-    const concatenated = `${reference}${cleanAmount}${currency}${integritySecret}`;
-    
-    console.log("Cadena exacta para Wompi:", concatenated);
+        /**
 
-    const encoder = new TextEncoder();
-    const data = encoder.encode(concatenated);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
 
 /**
- * Pasarela de Pagos Oficial Wompi con Firma Segura Corregida
+ * Pasarela de Pagos Oficial Wompi (Modo directo sin firma)
  */
 async function payWithWompi(amountInCents, productName) {
     const WOMPI_PUBLIC_KEY = 'pub_test_yeASV07aXBT4X1uM1LJUXqe1YfXDSKum'; 
-    const INTEGRITY_SECRET = 'test_integrity_hvFeL7nBRdOIBUjQzNO9Hs9zJwdEzyRi'; 
     const currency = 'COP';
     const referenceTx = 'CERTIPREP-' + Date.now();
     
@@ -901,25 +885,19 @@ async function payWithWompi(amountInCents, productName) {
     }
 
     try {
-        // Asegurar formato entero para el monto
         const exactAmount = parseInt(amountInCents, 10);
-        
-        // Calcular la firma criptográfica
-        const signatureHash = await generateWompiSignature(referenceTx, exactAmount, currency, INTEGRITY_SECRET);
 
         let currentUrl = window.location.href;
         if (!currentUrl.startsWith('http://') && !currentUrl.startsWith('https://')) {
             currentUrl = 'https://checkout.wompi.co';
         }
 
+        // Se inicializa el widget limpiamente sin el parámetro 'signature'
         var checkout = new WidgetCheckout({
             currency: currency,
             amountInCents: exactAmount, 
             reference: referenceTx,
             publicKey: WOMPI_PUBLIC_KEY,
-            signature: {
-                integrity: signatureHash
-            },
             redirectUrl: currentUrl 
         });
 
