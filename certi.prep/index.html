@@ -876,6 +876,8 @@ async function handleAuth(e, mode) {
 async function payWithWompi(amountInCents, productName) {
     // Tu llave pública real de producción de Wompi
     const WOMPI_PUBLIC_KEY = 'pub_test_yeASV07aXBT4X1uM1LJUXqe1YfXDSKum'; 
+    const INTEGRITY_SECRET = 'test_integrity_hvFeL7nBRdOIBUJqZNO9Hs9zJwdEzyRi'; // El secreto que no te dejaba borrar
+    const currency = 'COP';
     const referenceTx = 'CERTIPREP-TX-' + Date.now();
     
     // Verificar si el script de Wompi cargó correctamente
