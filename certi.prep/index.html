@@ -868,16 +868,17 @@ async function handleAuth(e, mode) {
         showNotification(err.message, "error");
     }
 }
-        /**
-         * 
 /**
- * Generador oficial de Firma de Integridad para Wompi Colombia (SHA-256)
- * Orden obligatorio: referencia + montoEnCentavos + moneda + secretoIntegridad
+ * Generador robusto de Firma de Integridad para Wompi Colombia (SHA-256)
+ * Se asegura de que el monto sea un entero estricto sin decimales.
  */
 async function generateWompiSignature(reference, amountInCents, currency, integritySecret) {
-    const concatenated = `${reference}${amountInCents}${currency}${integritySecret}`;
-    console.log("Cadena exacta para Wompi:", concatenated); // Para depurar en F12 si lo necesitas
+    // Forzar que el monto sea un número entero exacto
+    const cleanAmount = parseInt(amountInCents, 10);
+    const concatenated = `${reference}${cleanAmount}${currency}${integritySecret}`;
     
+    console.log("Cadena exacta para Wompi:", concatenated);
+
     const encoder = new TextEncoder();
     const data = encoder.encode(concatenated);
     const hashBuffer = await crypto.subtle.digest('SHA-256', data);
@@ -886,15 +887,12 @@ async function generateWompiSignature(reference, amountInCents, currency, integr
 }
 
 /**
- * Pasarela de Pagos Oficial Wompi con Firma Segura Integrada
+ * Pasarela de Pagos Oficial Wompi con Firma Segura Corregida
  */
 async function payWithWompi(amountInCents, productName) {
-    // Tus credenciales de pruebas exactas de Wompi
     const WOMPI_PUBLIC_KEY = 'pub_test_yeASV07aXBT4X1uM1LJUXqe1YfXDSKum'; 
     const INTEGRITY_SECRET = 'test_integrity_hvFeL7nBRdOIBUjQzNO9Hs9zJwdEzyRi'; 
     const currency = 'COP';
-    
-    // Generar una referencia única limpia y fija para esta transacción
     const referenceTx = 'CERTIPREP-' + Date.now();
     
     if (typeof WidgetCheckout === 'undefined') {
@@ -903,18 +901,20 @@ async function payWithWompi(amountInCents, productName) {
     }
 
     try {
-        // Calcular la firma criptográfica con el orden correcto exigido por Wompi
-        const signatureHash = await generateWompiSignature(referenceTx, amountInCents, currency, INTEGRITY_SECRET);
+        // Asegurar formato entero para el monto
+        const exactAmount = parseInt(amountInCents, 10);
+        
+        // Calcular la firma criptográfica
+        const signatureHash = await generateWompiSignature(referenceTx, exactAmount, currency, INTEGRITY_SECRET);
 
         let currentUrl = window.location.href;
         if (!currentUrl.startsWith('http://') && !currentUrl.startsWith('https://')) {
             currentUrl = 'https://checkout.wompi.co';
         }
 
-        // Inicializar el widget con la firma de integridad adjunta
         var checkout = new WidgetCheckout({
             currency: currency,
-            amountInCents: amountInCents, 
+            amountInCents: exactAmount, 
             reference: referenceTx,
             publicKey: WOMPI_PUBLIC_KEY,
             signature: {
@@ -927,7 +927,7 @@ async function payWithWompi(amountInCents, productName) {
             var transaction = result.transaction;
             
             if (transaction && transaction.status === 'APPROVED') {
-                handleSuccessfulPayment(transaction.id, amountInCents);
+                handleSuccessfulPayment(transaction.id, exactAmount);
             } else if (transaction && transaction.status === 'DECLINED') {
                 showNotification("La transacción fue declinada por tu entidad bancaria.", "error");
             } else if (transaction && transaction.status === 'ERROR') {
