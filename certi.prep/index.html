@@ -869,36 +869,54 @@ async function handleAuth(e, mode) {
     }
 }
         /**
- /**
- * Pasarela de Pagos Oficial Wompi Colombia (Producción)
- * Versión con manejo detallado de errores
+/**
+ * Función auxiliar para calcular el hash SHA-256 requerido por Wompi
+ */
+async function generateWompiSignature(reference, amountInCents, currency, integritySecret) {
+    const concatenated = `${reference}${amountInCents}${currency}${integritySecret}`;
+    const encoder = new TextEncoder();
+    const data = encoder.encode(concatenated);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+/**
+ * Pasarela de Pagos Oficial Wompi (Con firma de integridad incluida)
  */
 async function payWithWompi(amountInCents, productName) {
-    // Tu llave pública real de producción de Wompi
+    // 1. Tus credenciales de la imagen (Llave pública de prueba y Secreto de Integridad de prueba)
     const WOMPI_PUBLIC_KEY = 'pub_test_yeASV07aXBT4X1uM1LJUXqe1YfXDSKum'; 
-    const INTEGRITY_SECRET = 'test_integrity_hvFeL7nBRdOIBUJqZNO9Hs9zJwdEzyRi'; // El secreto que no te dejaba borrar
+    const INTEGRITY_SECRET = 'test_integrity_hvFeL7nBRdOIBUjQzNO9Hs9zJwdEzyRi'; // El secreto que no te dejaba borrar
     const currency = 'COP';
     const referenceTx = 'CERTIPREP-TX-' + Date.now();
     
-    // Verificar si el script de Wompi cargó correctamente
     if (typeof WidgetCheckout === 'undefined') {
         showNotification("La librería de Wompi no se ha cargado. Verifica tu conexión o bloqueadores.", "error");
         return;
     }
 
     try {
-        console.log("Inicializando Wompi con:", { amountInCents, referenceTx, WOMPI_PUBLIC_KEY });
+        // 2. Generar la firma de integridad criptográfica automáticamente en el navegador
+        const signatureHash = await generateWompiSignature(referenceTx, amountInCents, currency, INTEGRITY_SECRET);
 
-        // Inicializar el widget oficial de Wompi Colombia
+        let currentUrl = window.location.href;
+        if (!currentUrl.startsWith('http://') && !currentUrl.startsWith('https://')) {
+            currentUrl = 'https://checkout.wompi.co';
+        }
+
+        // 3. Configurar el widget enviando la firma requerida
         var checkout = new WidgetCheckout({
-            currency: 'COP',
+            currency: currency,
             amountInCents: amountInCents, 
             reference: referenceTx,
             publicKey: WOMPI_PUBLIC_KEY,
-            redirectUrl: window.location.href 
+            signature: {
+                integrity: signatureHash
+            },
+            redirectUrl: currentUrl 
         });
 
-        // Abrir el modal seguro de pago
         checkout.open(function (result) {
             var transaction = result.transaction;
             
@@ -911,12 +929,10 @@ async function payWithWompi(amountInCents, productName) {
             }
         });
     } catch (err) {
-        console.error("Error detallado al abrir Wompi:", err);
-        // Esto te mostrará el mensaje exacto del error en pantalla para identificarlo
+        console.error("Error al abrir Wompi:", err);
         showNotification("Error Wompi: " + (err.message || err), "error");
     }
 }
-
         // Ejecutar después de un pago validado
         function handleSuccessfulPayment(txId, amountInCents) {
             let currentUser = AuthStore.getUser();
